@@ -6,7 +6,8 @@
 *.ko
 *.obj
 *.elf
-
+*/source/
+*/install/
 # Linker output
 *.ilk
 *.map
