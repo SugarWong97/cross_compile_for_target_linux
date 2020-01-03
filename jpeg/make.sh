@@ -12,18 +12,27 @@
 BASE=`pwd`
 BUILD_HOST=arm-linux
 JPEG=jpegsrc.v9c
-OUTPUT=${BASE}/install/
+OUTPUT_PATH=${BASE}/install/
 
 make_dirs() {
     cd ${BASE}
     mkdir  compressed  install  source -p
 
 }
+tget () { #try wget
+    filename=`basename $1`
+    echo "Downloading [${filename}]..."
+    if [ ! -f ${filename} ];then
+        wget $1
+    fi
+
+    echo "[OK] Downloaded [${filename}] "
+}
 
 download_package () {
     cd ${BASE}/compressed
     #下载包
-    wget    http://www.ijg.org/files/${JPEG}.tar.gz
+    tget    http://www.ijg.org/files/${JPEG}.tar.gz
 }
 
 tar_package () {
@@ -37,7 +46,7 @@ tar_package () {
 configure_jpeg () {
     cd ${BASE}/source/*
     ./configure \
-    --prefix=${OUTPUT}/${JPEG} \
+    --prefix=${OUTPUT_PATH}/${JPEG} \
     --host=${BUILD_HOST}
 }
 

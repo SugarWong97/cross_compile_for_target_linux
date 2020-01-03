@@ -8,21 +8,31 @@
 ##
 #!/bin/sh
 BASE=`pwd`
-BUILD_HOST=arm-hisiv500-linux
+BUILD_HOST=arm-linux
 
 
-OUTPUT=${BASE}/install/
+OUTPUT_PATH=${BASE}/install/
 
 make_dirs() {
     cd ${BASE}
     mkdir  compressed  install  source -p
     sudo ls
 }
+tget () { #try wget
+    filename=`basename $1`
+    echo "Downloading [${filename}]..."
+    if [ ! -f ${filename} ];then
+        wget $1
+    fi
+
+    echo "[OK] Downloaded [${filename}] "
+}
+
 
 download_package () {
     cd ${BASE}/compressed
     #下载包
-    wget https://udhcp.busybox.net/source/udhcp-0.9.8.tar.gz
+    tget https://udhcp.busybox.net/source/udhcp-0.9.8.tar.gz
 }
 
 tar_package () {
@@ -58,7 +68,7 @@ do_copy () {
 }
 
 make_dirs
-#download_package
+download_package
 tar_package
 make_udhcp
 do_copy

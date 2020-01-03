@@ -14,14 +14,23 @@ make_dirs () {
     #为了方便管理，创建有关的目录
     cd ${BASE} && mkdir compressed install source -p
 }
+tget () { #try wget
+    filename=`basename $1`
+    echo "Downloading [${filename}]..."
+    if [ ! -f ${filename} ];then
+        wget $1 
+    fi
+
+    echo "[OK] Downloaded [${filename}] "
+}
 
 download_package () {
     cd ${BASE}/compressed
 
-    wget -c https://www.zlib.net/${ZLIB}.tar.gz 
-    wget -c http://www.oberhumer.com/opensource/lzo/download/${LZO}.tar.gz
-    wget -c https://jaist.dl.sourceforge.net/project/e2fsprogs/e2fsprogs/1.41.14/${E2FSPROGS}.tar.gz
-    wget -c ftp://ftp.infradead.org/pub/mtd-utils/${MTD_UTILS}.tar.bz2
+    tget https://www.zlib.net/${ZLIB}.tar.gz 
+    tget http://www.oberhumer.com/opensource/lzo/download/${LZO}.tar.gz
+    tget https://jaist.dl.sourceforge.net/project/e2fsprogs/e2fsprogs/1.41.14/${E2FSPROGS}.tar.gz
+    tget ftp://ftp.infradead.org/pub/mtd-utils/${MTD_UTILS}.tar.bz2
 
 }
 
@@ -92,7 +101,7 @@ make_mtd_utils () {
 
  echo "Using ${BUILD_HOST}-gcc"
 make_dirs
-#download_package
+download_package
 tar_package
 make_zlib
 make_lzo

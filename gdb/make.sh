@@ -8,21 +8,30 @@
 ##
 #!/bin/sh
 BASE=`pwd`
-BUILD_HOST=arm-hisiv500-linux
+BUILD_HOST=arm-linux
 
 
-OUTPUT=${BASE}/install/
+OUTPUT_PATH=${BASE}/install/
 
 make_dirs() {
     cd ${BASE}
     mkdir  compressed  install  source -p
     sudo ls
 }
+tget () { #try wget
+    filename=`basename $1`
+    echo "Downloading [${filename}]..."
+    if [ ! -f ${filename} ];then
+        wget $1
+    fi
+
+    echo "[OK] Downloaded [${filename}] "
+}
 
 download_package () {
     cd ${BASE}/compressed
     #下载包
-    wget http://ftp.gnu.org/gnu/gdb/gdb-7.8.1.tar.xz
+    tget http://ftp.gnu.org/gnu/gdb/gdb-7.8.1.tar.xz
 }
 
 tar_package () {
@@ -36,20 +45,20 @@ tar_package () {
 }
 make_gdb_host () {
     cd ${BASE}/source/gdb*
-    ./configure --target=${BUILD_HOST} --prefix=${OUTPUT}/gdb_host 
+    ./configure --target=${BUILD_HOST} --prefix=${OUTPUT_PATH}/gdb_host 
     make && make install
     
 }
 
 make_gdb_target () {
     cd ${BASE}/source/gdb*/gdb/gdbserver
-    ./configure --host=${BUILD_HOST} --prefix=${OUTPUT}/gdbserver
+    ./configure --host=${BUILD_HOST} --prefix=${OUTPUT_PATH}/gdbserver
     make && make install
 }
 
 
 make_dirs
-#download_package
+download_package
 tar_package
 # arm gdb 分为2个部分
 make_gdb_host

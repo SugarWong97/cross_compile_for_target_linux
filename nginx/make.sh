@@ -21,14 +21,24 @@ make_dirs() {
     rm source/* -rf
 }
 
+tget () { #try wget
+    filename=`basename $1`
+    echo "Downloading [${filename}]..."
+    if [ ! -f ${filename} ];then
+        wget $1
+    fi
+
+    echo "[OK] Downloaded [${filename}] "
+}
+
 download_package () {
     cd ${BASE}/compressed
     #下载包
-    wget -c https://www.zlib.net/${ZLIB}.tar.gz
-    wget    https://www.openssl.org/source/${OPENSSL}.tar.gz
+    tget  https://www.zlib.net/${ZLIB}.tar.gz
+    tget  https://www.openssl.org/source/${OPENSSL}.tar.gz
     # 注意地址
-    wget -c https://jaist.dl.sourceforge.net/project/pcre/pcre/8.30/${PCRE}.tar.bz2
-    wget -c http://mirrors.sohu.com/nginx/${NGINX}.tar.gz
+    tget  https://jaist.dl.sourceforge.net/project/pcre/pcre/8.30/${PCRE}.tar.bz2
+    tget  http://mirrors.sohu.com/nginx/${NGINX}.tar.gz
 }
 
 tar_package () {
@@ -115,7 +125,7 @@ make_nginx () {
  echo "Using ${BUILD_HOST}-gcc"
 make_dirs
 sudo ls
-#download_package
+download_package
 tar_package
 pre_configure_nginx
 configure_nginx

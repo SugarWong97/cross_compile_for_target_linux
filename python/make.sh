@@ -11,7 +11,7 @@ BASE=`pwd`
 BUILD_HOST=arm-linux
 PVERSION=3.6.10
 
-OUTPUT=${BASE}/install/
+OUTPUT_PATH=${BASE}/install/
 
 make_dirs() {
     cd ${BASE}
@@ -19,11 +19,22 @@ make_dirs() {
     sudo ls
 }
 
+tget () { #try wget
+    filename=`basename $1`
+    echo "Downloading [${filename}]..."
+    if [ ! -f ${filename} ];then
+        wget $1
+    fi
+
+    echo "[OK] Downloaded [${filename}] "
+}
+
 download_package () {
     cd ${BASE}/compressed
     #下载包
-    wget https://www.python.org/ftp/python/${PVERSION}/Python-${PVERSION}.tgz
+    tget https://www.python.org/ftp/python/${PVERSION}/Python-${PVERSION}.tgz
 }
+
 
 tar_package () {
     cd ${BASE}/compressed

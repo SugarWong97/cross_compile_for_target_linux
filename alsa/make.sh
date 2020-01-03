@@ -18,10 +18,20 @@ make_dirs () {
     cd ${BASE} && mkdir compressed install source -p
 }
 
+tget () { #try wget
+    filename=`basename $1`
+    echo "Downloading [${filename}]..."
+    if [ ! -f ${filename} ];then
+        wget $1
+    fi
+
+    echo "[OK] Downloaded [${filename}] "
+}
+
 download_package () {
     cd ${BASE}/compressed
-    wget ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.0.22.tar.bz2
-    wget ftp://ftp.alsa-project.org/pub/utils/alsa-utils-1.0.22.tar.bz2
+    tget ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.0.22.tar.bz2
+    tget ftp://ftp.alsa-project.org/pub/utils/alsa-utils-1.0.22.tar.bz2
 }
 
 tar_package () {
@@ -67,7 +77,7 @@ make_alsa_utils () {
 }
 echo "Using ${BUILD_HOST}"
 make_dirs
-#download_package
+download_package
 tar_package
 make_alsa_lib
 make_alsa_utils
