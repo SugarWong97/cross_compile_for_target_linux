@@ -5,9 +5,8 @@
 #    Created  :  Sat 30 Nov 2019 01:56:37 PM CST
 ##
 #!/bin/sh
-
-BUILD_HOST=arm-linux
-ARM_GCC=${BUILD_HOST}-gcc
+BUILD_HOST=arm-linux-
+ARM_GCC=${BUILD_HOST}gcc
 BASE=`pwd`
 OUTPUT_PATH=${BASE}/install
 ZLIB=zlib-1.2.11
@@ -80,11 +79,13 @@ make_ssl () {
     # 编译安装 zlib
     cd ${BASE}/source/${OPENSSL}
     echo "SSL ABOUT"
-    ./Configure --prefix=${OUTPUT_PATH}/${OPENSSL}  os/compiler:${ARM_GCC}
+    CC=${ARM_GCC} ./config no-asm shared --prefix=${OUTPUT_PATH}/${OPENSSL}
+
+    sed 's/-m64//g'  -i Makefile # 删除-m64 关键字 (arm-gcc 不支持)
     #sudo mv /usr/bin/pod2man /usr/bin/pod2man_bak
     #mv doc/apps /tmp/
     pre_make_ssl
-    make && make install
+    make -j4 && make install
 }
 
 do_copy () {
@@ -135,7 +136,7 @@ make_ssh () {
 
 make_dirs
 sudo ls
-#download_package
+download_package
 tar_package
 make_zlib
 make_ssl
