@@ -7,7 +7,7 @@
 ##
 #!/bin/sh
 BASE=`pwd`
-BUILD_HOST=arm-hisiv500-linux
+BUILD_HOST=arm-linux
 OUTPUT_PATH=${BASE}/install
 
 OTHER_LIB=${OUTPUT_PATH}/__all_without_ffmpeg
@@ -73,11 +73,6 @@ make_x265() {
         cp CMakeLists.txt.old  CMakeLists.txt
     fi
     # 获取 工具链所在位置 下面的操作为的是在 CMakeLists.txt 中插入下面内容
-        #set( CMAKE_SYSTEM_NAME Linux  )
-        #set( CMAKE_SYSTEM_PROCESSOR ARM  )
-        #set( CMAKE_C_COMPILER "/opt/hisi-linux/x86-arm/arm-hisiv500-linux/target/bin/arm-hisiv500-linux-gcc" )
-        #set( CMAKE_CXX_COMPILER "/opt/hisi-linux/x86-arm/arm-hisiv500-linux/target/bin/arm-hisiv500-linux-g++" )
-        #set( CMAKE_FIND_ROOT_PATH "/opt/hisi-linux/x86-arm/arm-hisiv500-linux/target/bin/" )
     GCC_FULL_PATH=`whereis ${BUILD_HOST}-gcc | awk -F: '{ print $2 }' | awk '{print $1}'` # 防止多个结果
     GCC_DIR=`dirname ${GCC_FULL_PATH}/`
     sed -i "1i\set( CMAKE_SYSTEM_NAME Linux  )"                         CMakeLists.txt
