@@ -32,11 +32,21 @@ make_dirs() {
     mkdir  compressed  install  source -p
     sudo ls
 }
+tget () { #try wget
+    filename=`basename $1`
+    echo "Downloading [${filename}]..."
+    if [ ! -f ${filename} ];then
+        wget $1
+    fi
+
+    echo "[OK] Downloaded [${filename}] "
+}
+
 
 download_package () {
     cd ${BASE}/compressed
     #下载包
-    wget http://ftp.gnu.org/gnu/gdb/gdb-7.8.1.tar.xz
+    tget http://ftp.gnu.org/gnu/gdb/gdb-7.8.1.tar.xz
 }
 
 tar_package () {

@@ -1,9 +1,8 @@
-> 本人的有关博客：《[Windows 编译安装 nginx 服务器 + rtmp 模块](https:////www.cnblogs.com/schips/p/12309174.html)》、《[Ubuntu 编译安装 nginx](https:////www.cnblogs.com/schips/p/12309201.html)》、《[Arm-Linux 移植 Nginx](https:////www.cnblogs.com/schips/p/12308651.html)》
-
 ## 背景
 Nginx 在一些基于web的嵌入式产品上能够使用，所以本人也介绍一下有关的支持。
+> 本人的有关博客：《[Windows 编译安装 nginx 服务器 + rtmp 模块](https:////www.cnblogs.com/schips/p/12309174.html)》、《[Ubuntu 编译安装 nginx](https:////www.cnblogs.com/schips/p/12309201.html)》、《[Arm-Linux 移植 Nginx](https:////www.cnblogs.com/schips/p/12308651.html)》
 > Host平台　　 ：Ubuntu 16.04
-> Arm平台　　  ： 3531d
+> Arm平台　　  ：3531d
 
 
 [rcre](https://sourceforge.net/projects/pcre/files/pcre/8.30/)　　　　 ： [8.30](https://jaist.dl.sourceforge.net/project/pcre/pcre/8.30/pcre-8.30.tar.bz2)
@@ -18,19 +17,14 @@ Nginx 在一些基于web的嵌入式产品上能够使用，所以本人也介�
 
 arm-gcc　　 ：4.9.4
 
-# 前言：
-
-### 　　**基本思路：**由于nginx在嵌入式下的支持不是很好，所以在配置编译之前，需要手动修改工程中的某些项目。
-
-　　注意：这个和以往的交叉编译不一样，nginx的交叉编译依赖的库都是源码包，而不是最终的结果。
-
- 
-
-**主机要做的事情：**
+注意：
+- 这个和以往的交叉编译不一样，nginx的交叉编译依赖的库都是源码包，而不是最终的结果。
+- 由于nginx在嵌入式下的支持不是很好，所以在配置编译之前，需要手动修改工程中的某些项目。
 
 
+## 主机准备
 
-```
+```bash
 ##
 #    Copyright By Schips, All Rights Reserved
 #    https://gitee.com/schips/
@@ -54,15 +48,26 @@ make_dirs() {
 
 }
 
+tget () { #try wget
+    filename=`basename $1`
+    echo "Downloading [${filename}]..."
+    if [ ! -f ${filename} ];then
+        wget $1
+    fi
+
+    echo "[OK] Downloaded [${filename}] "
+}
+
 download_package () {
     cd ${BASE}/compressed
     #下载包
-    wget -c https://www.zlib.net/${ZLIB}.tar.gz
-    wget    https://www.openssl.org/source/${OPENSSL}.tar.gz
+    tget https://www.zlib.net/${ZLIB}.tar.gz
+    tget https://www.openssl.org/source/${OPENSSL}.tar.gz
     # 注意地址
-    wget -c https://jaist.dl.sourceforge.net/project/pcre/pcre/8.30/${PCRE}.tar.bz2
-    wget -c http://mirrors.sohu.com/nginx/${NGINX}.tar.gz
+    tget https://jaist.dl.sourceforge.net/project/pcre/pcre/8.30/${PCRE}.tar.bz2
+    tget http://mirrors.sohu.com/nginx/${NGINX}.tar.gz
 }
+
 tar_package () {
     cd ${BASE}/compressed
     ls * > /tmp/list.txt
@@ -153,21 +158,14 @@ pre_make_nginx
 make_nginx
 ```
 
-
-
- 
-
- 
-
 这样应该就没有什么问题了。
 
  
-
-**arm板子：**
+## arm板子准备
 
 整个目录 拷贝 到板子，具体以prefix指定的路径为准上
 
-添加nginx有关库和运行路径环境变量\
+添加nginx有关库和运行路径环境变量
 
 完成nginx.conf的配置…(此步骤省略) 
 
@@ -181,13 +179,11 @@ make_nginx
 
  
 
- 
-
-**编译nginx时指定外部模块**
+## 编译nginx时指定外部模块
 
 第三方模块下载地址：https://www.nginx.com/resources/wiki/modules/index.html
 
-使第三方模块的生效方法： /configure  --add-module=模块的路径
+使第三方模块的生效方法： ./configure  --add-module=模块的路径
 
 例如：
 
@@ -205,13 +201,9 @@ make_nginx
 
 **正文到此结束，但为了让读者能够搞清楚脚本中的非常规指令的意义，本人保留了下文，以作为手动修改的参考依据。**
 
- 
 
- 
 
 nginx根目录下， 执行此脚本，再一步步排查错误。
-
-
 
 ```
     cd ${BASE}/source/${NGINX}
@@ -245,7 +237,7 @@ checking for OS
  + Linux 4.15.0-65-generic x86_64
 checking for C compiler ... found but is not working
 
-./configure: error: C compiler arm-linux-gcc is not found
+./configure: error: C compiler arm-hisiv500-linux-gcc is not found
 
 make: *** No rule to make target 'build', needed by 'default'.  Stop.
 ```
@@ -473,11 +465,11 @@ BUILD=.
 --with-pcre=./pcre-8.30 \
 --with-openssl=./openssl-1.0.2t \
 --with-zlib=./zlib-1.2.11 \
---with-cc=arm-linux-gcc \
---with-cpp=arm-linux-g++ \
+--with-cc=arm-hisiv500-linux-gcc \
+--with-cpp=arm-hisiv500-linux-g++ \
 --with-ld-opt=-lpthread \
 --with-cc-opt='-D_FILE_OFFSET_BITS=64 -D__USE_FILE_OFFSET64' \
---with-openssl-opt=os/compiler:arm-linux-gcc \
+--with-openssl-opt=os/compiler:arm-hisiv500-linux-gcc \
 --with-http_v2_module || exit 1
 
 
@@ -490,7 +482,7 @@ echo "#ifndef NGX_HAVE_SYSVSHM"    >> ngx_auto_config.h
 echo "#define NGX_HAVE_SYSVSHM 1"  >> ngx_auto_config.h
 echo "#endif"                      >> ngx_auto_config.h
 echo "Need edit Makefile" && exit 1
-make CC=arm-linux-gcc
+make CC=arm-hisiv500-linux-gcc
 make install
 ```
 

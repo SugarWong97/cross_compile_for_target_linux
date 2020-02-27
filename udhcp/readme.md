@@ -1,9 +1,9 @@
-## 背景：
+## 背景
 在一些网络环境下，需要静态IP不够现实，需要使用DHCP进行自动获取IP地址。
 
 udhcpc是一个面向嵌入式系统的非常小的DHCP客户端，字母的缩写微μ- DHCP -客户端client（μDHCPc）。
 
-*前提：在KERNEL中需要将 Packet socket(CONFIG_PACKET)和IP: DHCP support(CONFIG_IP_PNP_DHCP)编译进内核或编译成模块。*
+> 前提：在KERNEL中需要将 Packet socket(CONFIG_PACKET)和IP: DHCP support(CONFIG_IP_PNP_DHCP)编译进内核或编译成模块。
 
 在内核中添加以下选项：
 ```
@@ -22,7 +22,6 @@ udhcpc[208]: udhcpc (v0.9.9-pre) started
 FATAL: couldn't listen on socket, Address family not supported by protocol
 udhcpc[208]: FATAL: couldn't listen on socket, Address family not supported by protocol
 ```
-
 
 
 ## 移植 udhcp
@@ -57,11 +56,23 @@ make_dirs() {
     mkdir  compressed  install  source -p
     sudo ls
 }
+
+tget () { #try wget
+    filename=`basename $1`
+    echo "Downloading [${filename}]..."
+    if [ ! -f ${filename} ];then
+        wget $1
+    fi
+
+    echo "[OK] Downloaded [${filename}] "
+}
+
 download_package () {
     cd ${BASE}/compressed
     #下载包
-    wget  https://udhcp.busybox.net/source/udhcp-0.9.8.tar.gz
+    tget  https://udhcp.busybox.net/source/udhcp-0.9.8.tar.gz
 }
+
 tar_package () {
     cd ${BASE}/compressed
     ls * > /tmp/list.txt
@@ -71,12 +82,14 @@ tar_package () {
     done
     rm -rf /tmp/list.txt
 }
+
 make_udhcp () {
     cd ${BASE}/source/udhcp*
     sed -i '5, 12{s/COMBINED_BINARY=/#COMBINED_BINARY=/}'  Makefile
     sed -i '130, 135{s/case INIT_SELECTING:/case  INIT_SELECTING:;/}' dhcpc.c
     make   CROSS_COMPILE=${BUILD_HOST}-
 }
+
 do_copy () {
     cd ${BASE}/source/udhcp*
     mkdir ${BASE}/install/udhcp -p
@@ -168,7 +181,7 @@ option lease   864000      # 10 days of seconds
 重启开发板，执行udhcpc就可自动获取IP地址了，以下是执行udhcpc的输出信息：
 
 ```bash
- udhcpc -b -i eht0 -q
+~# udhcpc -b -i eht0 -q
 
 udhcpc (v0.9.9-pre) started
 udhcpc[228]: udhcpc (v0.9.9-pre) started

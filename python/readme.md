@@ -36,10 +36,21 @@ make_dirs() {
     sudo ls
 }
 
+tget () { #try wget
+    filename=`basename $1`
+    echo "Downloading [${filename}]..."
+    if [ ! -f ${filename} ];then
+        wget $1
+    fi
+
+    echo "[OK] Downloaded [${filename}] "
+}
+
+
 download_package () {
     cd ${BASE}/compressed
     #下载包
-    wget https://www.python.org/ftp/python/3.7.6/Python-3.7.6.tgz
+    tget https://www.python.org/ftp/python/3.7.6/Python-3.7.6.tgz
 }
 
 tar_package () {

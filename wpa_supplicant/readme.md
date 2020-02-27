@@ -1,5 +1,6 @@
 ## 背景：
-　　公司用的产品主板支持wifi接口，为了加强产品的功能，做wifi的底层支持。
+公司用的产品主板支持wifi接口，为了加强产品的功能，做wifi的底层支持。
+> 有关知识点：[浅谈 Linux 内核无线子系统](https://www.cnblogs.com/rain-blog/p/linux-wireless.html)             
 
 ## 概览
 主要的流程如下：
@@ -65,11 +66,21 @@ make_dirs() {
     mkdir  compressed  install  source -p
 }
 
+tget () { #try wget
+    filename=`basename $1`
+    echo "Downloading [${filename}]..."
+    if [ ! -f ${filename} ];then
+        wget $1
+    fi
+
+    echo "[OK] Downloaded [${filename}] "
+}
+
 download_package () {
     cd ${BASE}/compressed
     #下载包
-    wget     https://www.openssl.org/source/${OPENSSL}.tar.gz
-    wget -c http://w1.fi/releases/${WPA_SUPPLICANT}.tar.gz
+    tget https://www.openssl.org/source/${OPENSSL}.tar.gz
+    tget http://w1.fi/releases/${WPA_SUPPLICANT}.tar.gz
 }
 
 tar_package () {

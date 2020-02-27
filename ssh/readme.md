@@ -48,12 +48,22 @@ make_dirs () {
     cd ${BASE} && mkdir compressed install source -p
 }
 
+tget () { #try wget
+    filename=`basename $1`
+    echo "Downloading [${filename}]..."
+    if [ ! -f ${filename} ];then
+        wget $1
+    fi
+
+    echo "[OK] Downloaded [${filename}] "
+}
+
 download_package () {
     cd ${BASE}/compressed
     #下载包
-    wget -c https://www.zlib.net/${ZLIB}.tar.gz
-    wget    https://www.openssl.org/source/${OPENSSL}.tar.gz
-    wget -c http://mirrors.mit.edu/pub/OpenBSD/OpenSSH/portable/${OPENSSH}.tar.gz
+    tget https://www.zlib.net/${ZLIB}.tar.gz
+    tget https://www.openssl.org/source/${OPENSSL}.tar.gz
+    tget http://mirrors.mit.edu/pub/OpenBSD/OpenSSH/portable/${OPENSSH}.tar.gz
 }
 
 tar_package () {

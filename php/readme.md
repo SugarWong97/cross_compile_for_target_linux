@@ -44,12 +44,23 @@ make_dirs () {
     mkdir  compressed  install  source -p
 }
 
+tget () { #try wget
+    filename=`basename $1`
+    echo "Downloading [${filename}]..."
+    if [ ! -f ${filename} ];then
+        wget $1
+    fi
+
+    echo "[OK] Downloaded [${filename}] "
+}
+
+
 download_package () {
     cd ${BASE}/compressed
-    wget http://mirrors.sohu.com/php/${PHP}.tar.gz
-    wget -c https://www.zlib.net/${ZLIB}.tar.gz
-    wget -c http://distfiles.macports.org/libxml2/${XML2}.tar.gz
-    wget http://ftp.gnu.org/pub/gnu/libiconv/${ICONV}.tar.gz
+    tget http://mirrors.sohu.com/php/${PHP}.tar.gz
+    tget https://www.zlib.net/${ZLIB}.tar.gz
+    tget http://distfiles.macports.org/libxml2/${XML2}.tar.gz
+    tget http://ftp.gnu.org/pub/gnu/libiconv/${ICONV}.tar.gz
 }
 
 tar_package () {

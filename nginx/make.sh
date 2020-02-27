@@ -18,7 +18,7 @@ FIN_INSTALL=/usr/${NGINX}
 make_dirs() {
     cd ${BASE}
     mkdir  compressed  install  source -p
-    rm source/* -rf
+
 }
 
 tget () { #try wget
@@ -34,11 +34,11 @@ tget () { #try wget
 download_package () {
     cd ${BASE}/compressed
     #下载包
-    tget  https://www.zlib.net/${ZLIB}.tar.gz
-    tget  https://www.openssl.org/source/${OPENSSL}.tar.gz
+    tget https://www.zlib.net/${ZLIB}.tar.gz
+    tget https://www.openssl.org/source/${OPENSSL}.tar.gz
     # 注意地址
-    tget  https://jaist.dl.sourceforge.net/project/pcre/pcre/8.30/${PCRE}.tar.bz2
-    tget  http://mirrors.sohu.com/nginx/${NGINX}.tar.gz
+    tget https://jaist.dl.sourceforge.net/project/pcre/pcre/8.30/${PCRE}.tar.bz2
+    tget http://mirrors.sohu.com/nginx/${NGINX}.tar.gz
 }
 
 tar_package () {
@@ -51,6 +51,7 @@ tar_package () {
     rm -rf /tmp/list.txt
 }
 
+
 pre_configure_nginx () {
     cd ${BASE}/source/${NGINX}
     # auto/cc/name
@@ -59,11 +60,11 @@ pre_configure_nginx () {
 
     # auto/types/sizeof
     sed -r -i "/ngx_size=`$NGX_AUTOTEST`/ s/.*/\tngx_size=4/g" auto/types/sizeof
-    # 
+    #
     sed -r -i "/PCRE_CONF_OPT=/ s/.*/PCRE_CONF_OPT=--host=${BUILD_HOST}/g" auto/options
 }
 
- 
+
 configure_nginx () {
     cd ${BASE}/source/${NGINX}
     BUILD=`pwd`
@@ -88,50 +89,46 @@ pre_make_nginx () {
     cd ${BASE}/source/${NGINX}
     HEAD_FILE=`find . -name "ngx_auto_config.h"`
     DEL_LINE=`sed -n "/NGX_CONFIGURE/="  ${HEAD_FILE}`
-	sed -i "${DEL_LINE}d" ${HEAD_FILE}
+        sed -i "${DEL_LINE}d" ${HEAD_FILE}
     echo "#undef NGX_CONFIGURE " >> ${HEAD_FILE}
     echo "#define NGX_CONFIGURE \"./configure\"" >> ${HEAD_FILE}
     echo "#ifndef NGX_SYS_NERR" >> ${HEAD_FILE}
     echo "#define NGX_SYS_NERR 132" >> ${HEAD_FILE}
     echo "#endif" >> ${HEAD_FILE}
-    
+
     echo "#ifndef NGX_HAVE_SYSVSHM" >> ${HEAD_FILE}
     echo "#define NGX_HAVE_SYSVSHM 1" >> ${HEAD_FILE}
     echo "#endif" >> ${HEAD_FILE}
 
     # 删除makefile 多余的几行
 
-	DEL_LINE=`sed -n "/build\:/="  Makefile  | awk 'END {print}'`
+        DEL_LINE=`sed -n "/build\:/="  Makefile  | awk 'END {print}'`
     # 因为是有 2 行，删除以后文件会发生变化
-	sed -i "${DEL_LINE}d" Makefile
-	sed -i "${DEL_LINE}d" Makefile
+        sed -i "${DEL_LINE}d" Makefile
+        sed -i "${DEL_LINE}d" Makefile
 
-	DEL_LINE=`sed -n "/install\:/="  Makefile  | awk 'END {print}'`
-	sed -i "${DEL_LINE}d" Makefile
-	sed -i "${DEL_LINE}d" Makefile
+        DEL_LINE=`sed -n "/install\:/="  Makefile  | awk 'END {print}'`
+        sed -i "${DEL_LINE}d" Makefile
+        sed -i "${DEL_LINE}d" Makefile
 
-	DEL_LINE=`sed -n "/modules\:/="  Makefile  | awk 'END {print}'`
-	sed -i "${DEL_LINE}d" Makefile
-	sed -i "${DEL_LINE}d" Makefile
+        DEL_LINE=`sed -n "/modules\:/="  Makefile  | awk 'END {print}'`
+        sed -i "${DEL_LINE}d" Makefile
+        sed -i "${DEL_LINE}d" Makefile
 
 }
 
 make_nginx () {
     cd ${BASE}/source/${NGINX}
     make -j4 && sudo make install && sudo mv ccinfo ${FIN_INSTALL}/ccinfo
-    sudo mv ${FIN_INSTALL} ${BASE}/install
 }
-
- echo "Using ${BUILD_HOST}-gcc"
-make_dirs
 sudo ls
-download_package
+make_dirs
+#download_package
 tar_package
 pre_configure_nginx
 configure_nginx
 pre_make_nginx
 make_nginx
-
 exit $?
 
 sbin/nginx -c xx/nginx.conf

@@ -1,4 +1,4 @@
-##
+A##
 #    Copyright By Schips, All Rights Reserved
 #    https://gitee.com/schips/
 
@@ -32,11 +32,12 @@ tget () { #try wget
     echo "[OK] Downloaded [${filename}] "
 }
 
+
 download_package () {
     cd ${BASE}/compressed
     #下载包
-    tget -c https://github.com/libts/tslib/releases/download/1.4/tslib-1.4.tar.bz2
-    tget  http://mirrors.ustc.edu.cn/qtproject/archive/qt/5.9/5.9.8/single/qt-everywhere-opensource-src-5.9.8.tar.xz
+    tget https://github.com/libts/tslib/releases/download/1.4/tslib-1.4.tar.bz2
+    tget http://mirrors.ustc.edu.cn/qtproject/archive/qt/5.9/5.9.8/single/qt-everywhere-opensource-src-5.9.8.tar.xz
 }
 
 tar_package () {
@@ -104,7 +105,9 @@ pre_configure_xplatform () {
 
     #sed -i 'N;20a\QMAKE_INCDIR += ${OUTPUT}/tslib/include' qmake.conf
     #sed -i 'N;20a\QMAKE_LIBDIR += ${OUTPUT}/tslib/lib'     qmake.conf
+    
 }
+
 
 configure_qt () {
     cd ${BASE}/source/qt*
@@ -134,7 +137,7 @@ configure_qt () {
     -skip qtcanvas3d \
     -skip qtdeclarative \
     -no-iconv \
-    -I${OUTPUT}/tslib/include  -L${OUTPUT}/tslib/lib | tee ${OUTPUT}/qt_configure_information
+    -I${OUTPUT}/tslib/include  -L${OUTPUT}/tslib/lib | tee ${BASE}/install/qt_configure_information
 }
 
 make_qt () {
