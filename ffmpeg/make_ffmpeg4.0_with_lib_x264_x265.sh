@@ -31,7 +31,7 @@ download_package () {
     cd ${BASE}/compressed
     tget http://download.videolan.org/pub/videolan/x264/snapshots/x264-snapshot-20171212-2245.tar.bz2
     tget http://ffmpeg.org/releases/ffmpeg-4.0.1.tar.bz2
-    tget http://download.videolan.org/videolan/x265/x265_2.6.tar.gz
+    tget http://download.videolan.org/videolan/x265/x265_3.2.tar.gz
 }
 
 tar_package () {
@@ -99,6 +99,8 @@ prepare_other_lib () {
     rm -rf /tmp/list.txt
 }
 make_ffmpeg() {
+    MYPKGCONFIG=${BASE}/install/x265/lib/pkgconfig/
+    export PKG_CONFIG_PATH=${MYPKGCONFIG}:$PKG_CONFIG_PATH
     cd ${BASE}/source/ffmpeg*
     ./configure \
     --cross-prefix=${BUILD_HOST}- \
@@ -109,6 +111,7 @@ make_ffmpeg() {
     --prefix=${OUTPUT_PATH}/ffmpeg \
     --enable-shared \
     --enable-static \
+    --pkg-config="pkg-config --static" \
     --enable-gpl \
     --enable-nonfree \
     --enable-ffmpeg \
@@ -121,8 +124,9 @@ make_ffmpeg() {
     --disable-yasm \
     --disable-stripping \
     --enable-libx264 \
+    --enable-libx265 \
     --extra-cflags=-I${OTHER_LIB}/include \
-    --extra-ldflags=-L${OTHER_LIB}/lib
+    --extra-ldflags=-L${OTHER_LIB}/lib &&
     make clean && make -j4 && make install
 }
 echo "Using ${BUILD_HOST}-gcc"
@@ -130,10 +134,9 @@ make_dirs
 download_package
 tar_package
 make_x264
-#make_x265
+make_x265
 prepare_other_lib
 make_ffmpeg
 
 exit $?
     --enable-ffserver \
-    --enable-libx265 \
