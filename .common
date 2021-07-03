@@ -39,6 +39,10 @@ EOF
     make $MKTHD && make install
 }
 
+function get_zlib () {
+    tget https://www.zlib.net/${ZLIB}.tar.gz 
+}
+
 
 set_compile_env_for_target () {
     export CC=${_CC}
