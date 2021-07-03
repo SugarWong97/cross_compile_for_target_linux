@@ -7,44 +7,8 @@
 
 ##
 #!/bin/sh
-BASE=`pwd`
-BUILD_HOST=arm-linux
-OUTPUT_PATH=${BASE}/install/
 
-export PATH=${PATH}:/opt/gcc-arm-linux-gnueabi/bin
-
-require () {
-    if [ -z "$1" ];then
-        return 
-    fi
-    command -v $1 >/dev/null 2>&1 || { echo >&2 "Aborted : Require \"$1\" but not found."; exit 1;   }
-    echo "Using: $1"
-}
-
-make_dirs() {
-    cd ${BASE}
-    mkdir  compressed  install  source -p
-}
-
-tget () { #try wget
-    filename=`basename $1`
-    echo "Downloading [${filename}]..."
-    if [ ! -f ${filename} ];then
-        wget $1
-    fi
-
-    echo "[OK] Downloaded [${filename}] "
-}
-
-tar_package () {
-    cd ${BASE}/compressed
-    ls * > /tmp/list.txt
-    for TAR in `cat /tmp/list.txt`
-    do
-        tar -xf $TAR -C  ../source
-    done
-    rm -rf /tmp/list.txt
-}
+source ../.common
 
 download_package () {
     cd ${BASE}/compressed
@@ -54,11 +18,11 @@ download_package () {
 }
 
 set_compile_env_for_arm () {
-	export CC=${BUILD_HOST}-gcc
-	export AR=${BUILD_HOST}-ar
-	export LD=${BUILD_HOST}-ld
-	export RANLIB=${BUILD_HOST}-ranlib
-	export STRIP=${BUILD_HOST}-strip
+	export CC=${_CC}
+	export AR=${_AR}
+	export LD=${_LD}
+	export RANLIB=${_RANLIB}
+	export STRIP=${_STRIP}
 }
 
 make_iperf_host () {
@@ -75,11 +39,14 @@ make_iperf_target () {
     make -j4 && make install
 }
 
-require ${BUILD_HOST}-gcc
+function make_build ()
+{
+    download_package  || return 1
+    tar_package || return 1
 
-make_dirs
-download_package
-tar_package
-make_iperf_host
-set_compile_env_for_arm
-make_iperf_target
+    make_iperf_host  || return 1
+    set_compile_env_for_arm
+    make_iperf_target  || return 1
+}
+
+make_build || echo "Err"

@@ -7,37 +7,21 @@
 
 ##
 #!/bin/sh
-# 注意 go 的脚本不具备通用性
-BUILD_HOST=arm-linux
-BASE=`pwd`
+source ../.common
 
-ARM_GO_DIR=${BASE}/source/_arm_go
-HIG_GO_DIR=${BASE}/source/_go_higher
-BOOTSTRAP_DIR=${BASE}/source/_go_boot_strap
+ARM_GO_DIR=${CODE_PATH}/_arm_go
+HIG_GO_DIR=${CODE_PATH}/_go_higher
+BOOTSTRAP_DIR=${CODE_PATH}/_go_boot_strap
 
-GOROOT_BOOTSTRAP=${BOOTSTRAP_DIR}/go
+export GOROOT_BOOTSTRAP=${BOOTSTRAP_DIR}/go
 
-
-CROSS_TOOL_DIR=`dirname \`whereis ${BUILD_HOST}-gcc | awk -F: '{ print $2 }'\``
-
-make_dirs () {
-    #为了方便管理，创建有关的目录
-    cd ${BASE} && mkdir compressed install source -p
-}
-
-tget () { #try wget
-    filename=`basename $1`
-    echo "Downloading [${filename}]..."
-    if [ ! -f ${filename} ];then
-        wget $1
-    fi
-
-    echo "[OK] Downloaded [${filename}] "
-}
+export GCC_FULL_PATH=`whereis ${_CC} | awk -F: '{ print $2 }' | awk '{print $1}'` # 防止多个结果
+export GCC_DIR=`dirname ${GCC_FULL_PATH}/`
+CROSS_TOOL_DIR=${GCC_DIR}
 
 download_package () {
     cd ${BASE}/compressed
-
+    # bootstap
     tget https://dl.google.com/go/go1.4.3.src.tar.gz
     # 高版本
     tget https://dl.google.com/go/go1.13.8.src.tar.gz
@@ -56,17 +40,15 @@ make_go_for_boot_stap () {
     CGO_ENABLED=0 GOOS=linux GOARCH=amd64 ./make.bash
 }
 
-tar_go_version_higher_host () {
+function make_go_version_higher_host() {
+function tar_go_version_higher_host () {
     cd ${BASE}/compressed
     HIGHER=`ls go* | grep -v 1.4 `
 
     mkdir ${HIG_GO_DIR} -p
     tar -xf $HIGHER -C ${HIG_GO_DIR}
 }
-
-make_go_version_higher_host() {
-    export GOROOT_BOOTSTRAP=$GOROOT_BOOTSTRAP
-
+    # tar_go_version_higher_host  || return 1
     cd ${HIG_GO_DIR}/go/src
     GOOS=linux GOARCH=amd64 ./make.bash
 }
@@ -75,11 +57,10 @@ tar_go_version_higher_arm () {
     cd ${BASE}/compressed
     HIGHER=`ls go* |grep -v 1.4 `
     mkdir ${ARM_GO_DIR} -p
-    tar -xf $HIGHER -C ${ARM_GO_DIR}
+    tar -xvf $HIGHER -C ${ARM_GO_DIR}
 }
 
 make_go_version_higher_arm() {
-    export GOROOT_BOOTSTRAP=$GOROOT_BOOTSTRAP
 
     cd ${ARM_GO_DIR}/go/src
     CGO="no"
@@ -87,52 +68,52 @@ make_go_version_higher_arm() {
     then
         echo "CGO is enable"
         # 开启CGO编译（参考下文）
-        export  CC_FOR_TARGET=${CROSS_TOOL_DIR}/${BUILD_HOST}-gcc
-        export CXX_FOR_TARGET=${CROSS_TOOL_DIR}/${BUILD_HOST}-g++
+        export  CC_FOR_TARGET=${CROSS_TOOL_DIR}/${_CC}
+        export CXX_FOR_TARGET=${CROSS_TOOL_DIR}/${_CPP}
         CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=7 ./make.bash
     else
         echo "CGO is disable"
         # 关闭CGO编译
         CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 ./make.bash
     fi
-
 }
 
-make_together () {
+reorganize () {
     #boot strap
-    mv ${BOOTSTRAP_DIR}/go ${BASE}/install/go_boot_strap
+    mv ${BOOTSTRAP_DIR}/go ${OUTPUT_PATH}/go_boot_strap
 
     #higher_host(好像arm版本的编译里面也自带了本机可以用的go)
     #mv ${HIG_GO_DIR}/go  ${BASE}/install/go_host
 
     #higher_arm
-    mv ${ARM_GO_DIR}/go ${BASE}/install/go_arm
+    mv ${ARM_GO_DIR}/go ${OUTPUT_PATH}/go_arm
 
     echo "go bootstarp  is  : $GOROOT_BOOTSTRAP"
     echo "CC_FOR_TARGET  is : ${CROSS_TOOL_DIR}/${BUILD_HOST}-gcc"
     echo "CXX_FOR_TARGET is : ${CROSS_TOOL_DIR}/${BUILD_HOST}-g++"
 
     # 关于下方的变量请参考有关文章
-    GOROOT="${BASE}/install/go_host"
+    GOROOT="${OUTPUT_PATH}/go_host"
     GOPATH=`dirname $GOROOT`/gopath
     echo "GOROOT is : ${GOROOT}"
     echo "GOPATH is : ${GOPATH}"
 
 }
 
+function make_build ()
+{
+    download_package  || return 1
+    tar_go_for_boot_stap  || return 1
+    make_go_for_boot_stap  || return 1
+        #arm版本的编译里面也带了本机可以用的go，
+        #make_go_version_higher_host  || return 1
 
-echo "Using ${BUILD_HOST}-gcc"
-make_dirs
-download_package
+    tar_go_version_higher_arm  || return 1
+    make_go_version_higher_arm  || return 1
 
-  tar_go_for_boot_stap
- make_go_for_boot_stap
+    reorganize  || return 1
+}
 
-#好像arm版本的编译里面也带了本机可以用的go，
-# tar_go_version_higher_host
-#make_go_version_higher_host
-
- tar_go_version_higher_arm
- make_go_version_higher_arm
-
-make_together
+make_build || echo "Err"
+exit $?
+#################### 如何配置go

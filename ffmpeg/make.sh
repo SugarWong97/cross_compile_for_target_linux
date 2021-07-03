@@ -6,26 +6,12 @@
 #    Created  :  Mon 02 Sep 2019 08:05:53 PM HKT
 ##
 #!/bin/sh
-BASE=`pwd`
-BUILD_HOST=arm-linux
-OUTPUT_PATH=${BASE}/install
+source ../.common
 
 OTHER_LIB=${OUTPUT_PATH}/__all_without_ffmpeg
-
-make_dirs () {
-    #为了方便管理，创建有关的目录
-    cd ${BASE} && mkdir compressed install source -p
-}
-
-tget () { #try wget
-    filename=`basename $1`
-    echo "Downloading [${filename}]..."
-    if [ ! -f ${filename} ];then
-        wget $1
-    fi
-
-    echo "[OK] Downloaded [${filename}] "
-}
+X264_OUTPUT_PATH=${OUTPUT_PATH}/x264
+X265_OUTPUT_PATH=${OUTPUT_PATH}/x265
+FFMP_OUTPUT_PATH=${OUTPUT_PATH}/ffmpeg
 
 download_package () {
     cd ${BASE}/compressed
@@ -34,30 +20,27 @@ download_package () {
     tget http://download.videolan.org/videolan/x265/x265_3.2.tar.gz
 }
 
-tar_package () {
-    cd ${BASE}/compressed
-    ls * > /tmp/list.txt
-    for TAR in `cat /tmp/list.txt`
-    do
-        tar -xf $TAR -C  ../source
-    done
-    rm -rf /tmp/list.txt
-}
-
-make_x264() {
-    cd ${BASE}/source/x264*
-
-    CC=${BUILD_HOST}-gcc \
+function make_x264() {
+function _make_sh () {
+cat<<EOF
+    CC=${_CC} \
     ./configure \
     --host=${BUILD_HOST} \
     --enable-shared \
     --enable-static \
     --enable-pic \
-    --prefix=${OUTPUT_PATH}/x264 \
-    --cross-prefix=${BUILD_HOST}- \
+    --prefix=${X264_OUTPUT_PATH} \
+    --cross-prefix=${BUILD_HOST_} \
     --disable-asm 
+EOF
+}
+    cd ${BASE}/source/x264*
 
-    make -j4 && make install
+    _make_sh > $tmp_config
+    source ./$tmp_config || return 1
+
+    make clean
+    make $MKTHD && make install
 }
 
 make_x265() {
@@ -73,18 +56,20 @@ make_x265() {
         cp CMakeLists.txt.old  CMakeLists.txt
     fi
     # 获取 工具链所在位置 下面的操作为的是在 CMakeLists.txt 中插入下面内容
-    GCC_FULL_PATH=`whereis ${BUILD_HOST}-gcc | awk -F: '{ print $2 }' | awk '{print $1}'` # 防止多个结果
+    GCC_FULL_PATH=`whereis ${_CC} | awk -F: '{ print $2 }' | awk '{print $1}'` # 防止多个结果
     GCC_DIR=`dirname ${GCC_FULL_PATH}/`
     sed -i "1i\set( CMAKE_SYSTEM_NAME Linux  )"                         CMakeLists.txt
     sed -i "2a\set( CMAKE_SYSTEM_PROCESSOR ARM  )"                      CMakeLists.txt
-    sed -i "2a\set( CMAKE_C_COMPILER ${GCC_DIR}/${BUILD_HOST}-gcc  )"   CMakeLists.txt
-    sed -i "2a\set( CMAKE_CXX_COMPILER ${GCC_DIR}/${BUILD_HOST}-g++  )" CMakeLists.txt
+    sed -i "2a\set( CMAKE_C_COMPILER ${GCC_DIR}/${_CC}  )"              CMakeLists.txt
+    sed -i "2a\set( CMAKE_CXX_COMPILER ${GCC_DIR}/${_CPP}  )"           CMakeLists.txt
     sed -i "2a\set( CMAKE_FIND_ROOT_PATH ${GCC_DIR} )"                  CMakeLists.txt
     cmake ../source
     # 指定安装路径
-    sed -i "1i\set( CMAKE_INSTALL_PREFIX "${BASE}/install/x265"  )"     cmake_install.cmake
-    make && make install
+    sed -i "1i\set( CMAKE_INSTALL_PREFIX "${X265_OUTPUT_PATH}"  )"     cmake_install.cmake
+    make clean
+    make $MKTHD && make install
 }
+
 prepare_other_lib () {
     # 这一个是针对 ffmpeg 方便管理外部库使用的
     # 核心思想是把 所有的库都放到一起，再让 ffmpeg ld的时候在这里找（而不是添加多行） --extra-cflags="-I${X264_DIR}/include -I${xxx}/include" \
@@ -98,17 +83,19 @@ prepare_other_lib () {
     done
     rm -rf /tmp/list.txt
 }
-make_ffmpeg() {
+
+function make_ffmpeg() {
+function _make_sh () {
+cat<<EOF
     MYPKGCONFIG=${BASE}/install/x265/lib/pkgconfig/
     export PKG_CONFIG_PATH=${MYPKGCONFIG}:$PKG_CONFIG_PATH
-    cd ${BASE}/source/ffmpeg*
     ./configure \
-    --cross-prefix=${BUILD_HOST}- \
+    --cross-prefix=${BUILD_HOST_} \
     --enable-cross-compile \
     --target-os=linux \
-    --cc=${BUILD_HOST}-gcc \
+    --cc=${_CC} \
     --arch=arm \
-    --prefix=${OUTPUT_PATH}/ffmpeg \
+    --prefix=${FFMP_OUTPUT_PATH} \
     --enable-shared \
     --enable-static \
     --pkg-config="pkg-config --static" \
@@ -126,17 +113,29 @@ make_ffmpeg() {
     --enable-libx264 \
     --enable-libx265 \
     --extra-cflags=-I${OTHER_LIB}/include \
-    --extra-ldflags=-L${OTHER_LIB}/lib &&
-    make clean && make -j4 && make install
+    --extra-ldflags=-L${OTHER_LIB}/lib
+EOF
+    #--enable-ffserver \
 }
-echo "Using ${BUILD_HOST}-gcc"
-make_dirs
-download_package
-tar_package
-make_x264
-make_x265
-prepare_other_lib
-make_ffmpeg
+    MYPKGCONFIG=${X265_OUTPUT_PATH}/lib/pkgconfig/
+    export PKG_CONFIG_PATH=${MYPKGCONFIG}:$PKG_CONFIG_PATH
 
-exit $?
-    --enable-ffserver \
+    cd ${BASE}/source/ffmpeg*
+    _make_sh > $tmp_config
+    source ./$tmp_config || return 1
+    make clean
+    make $MKTHD && make install
+}
+
+function make_build ()
+{
+    require cmake || return 1
+    download_package  || return 1
+    #tar_package || return 1
+    #make_x264 || return 1
+    #make_x265 || return 1
+    #prepare_other_lib || return 1
+    make_ffmpeg
+}
+
+make_build || echo "Err"

@@ -1,6 +1,4 @@
 ##
-#!/bin/sh
-##
 #    Copyright By Schips, All Rights Reserved
 #    https://gitee.com/schips/
 
@@ -9,26 +7,11 @@
 
 ##
 #!/bin/sh
-BASE=`pwd`
-BUILD_HOST=arm-linux
+
+source ../.common
+
 JPEG=jpegsrc.v9c
-OUTPUT_PATH=${BASE}/install/
-
-make_dirs() {
-    cd ${BASE}
-    mkdir  compressed  install  source -p
-
-}
-
-tget () { #try wget
-    filename=`basename $1`
-    echo "Downloading [${filename}]..."
-    if [ ! -f ${filename} ];then
-        wget $1
-    fi
-
-    echo "[OK] Downloaded [${filename}] "
-}
+JPEG_OUTPUT=${OUTPUT_PATH}/${JPEG}
 
 download_package () {
     cd ${BASE}/compressed
@@ -36,32 +19,29 @@ download_package () {
     tget    http://www.ijg.org/files/${JPEG}.tar.gz
 }
 
-tar_package () {
-    cd ${BASE}/compressed
-    ls * > /tmp/list.txt
-    for TAR in `cat /tmp/list.txt`
-    do
-        tar -xf $TAR -C  ../source
-    done
-    rm -rf /tmp/list.txt
-}
-
-
-configure_jpeg () {
-    cd ${BASE}/source/*
+function make_jpeg () {
+function _make_sh () {
+cat<<EOF
     ./configure \
-    --prefix=${OUTPUT_PATH}/${JPEG} \
+    --prefix=${JPEG_OUTPUT}/ \
     --host=${BUILD_HOST}
+EOF
 }
-
-
-make_jpeg () {
     cd ${BASE}/source/*
-	make -j4 && make install
+
+    _make_sh > $tmp_config
+    source ./$tmp_config || return 1
+
+    make clean
+    make $MKTHD && make install
 }
-echo "Using ${BUILD_HOST}-gcc"
-make_dirs
-download_package
-tar_package
-configure_jpeg
-make_jpeg
+
+function make_build ()
+{
+    download_package  || return 1
+    tar_package || return 1
+
+    make_jpeg  || return 1
+}
+
+make_build || echo "Err"

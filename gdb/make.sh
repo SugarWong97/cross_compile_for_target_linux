@@ -7,26 +7,11 @@
 
 ##
 #!/bin/sh
-BASE=`pwd`
-BUILD_HOST=arm-linux
 
+source ../.common
 
-OUTPUT_PATH=${BASE}/install/
-
-make_dirs() {
-    cd ${BASE}
-    mkdir  compressed  install  source -p
-    sudo ls
-}
-tget () { #try wget
-    filename=`basename $1`
-    echo "Downloading [${filename}]..."
-    if [ ! -f ${filename} ];then
-        wget $1
-    fi
-
-    echo "[OK] Downloaded [${filename}] "
-}
+GDB_HOST=${OUTPUT_PATH}/gdb_host 
+GDB_TARG=${OUTPUT_PATH}/gdbserver
 
 download_package () {
     cd ${BASE}/compressed
@@ -34,34 +19,43 @@ download_package () {
     tget http://ftp.gnu.org/gnu/gdb/gdb-7.8.1.tar.xz
 }
 
-tar_package () {
-    cd ${BASE}/compressed
-    ls * > /tmp/list.txt
-    for TAR in `cat /tmp/list.txt`
-    do
-        tar -xf $TAR -C  ../source
-    done
-    rm -rf /tmp/list.txt
+function make_gdb_host () {
+function _make_sh () {
+cat<<EOF
+    ./configure --target=${BUILD_HOST} --prefix=${GDB_HOST}
+EOF
 }
-make_gdb_host () {
     cd ${BASE}/source/gdb*
-    ./configure --target=${BUILD_HOST} --prefix=${OUTPUT_PATH}/gdb_host 
-    make && make install
+
+    _make_sh > $tmp_config
+    source ./$tmp_config || return 1
     
+    make clean
+    make $MKTHD && make install
 }
 
-make_gdb_target () {
+function make_gdb_target () {
+function _make_sh () {
+cat<<EOF
+    ./configure --host=${BUILD_HOST} --prefix=${GDB_TARG}
+EOF
+}
     cd ${BASE}/source/gdb*/gdb/gdbserver
-    ./configure --host=${BUILD_HOST} --prefix=${OUTPUT_PATH}/gdbserver
-    make && make install
+
+    _make_sh > $tmp_config
+    source ./$tmp_config || return 1
+    
+    make clean
+    make $MKTHD && make install
 }
 
+function make_build ()
+{
+    download_package  || return 1
+    tar_package || return 1
+    # arm gdb 分为2个部分
+    make_gdb_host  || return 1
+    make_gdb_target  || return 1
+}
 
-make_dirs
-download_package
-tar_package
-# arm gdb 分为2个部分
-make_gdb_host
-make_gdb_target
-exit $?
-
+make_build || echo "Err"

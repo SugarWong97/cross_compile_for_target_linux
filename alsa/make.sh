@@ -7,26 +7,9 @@
 ##
 #!/bin/zsh
 
-BUILD_HOST=arm-linux
+source ../.common
 
-BASE=`pwd`
-OUTPUT_PATH=${BASE}/install
 ALSALIB_DIR=${OUTPUT_PATH}/alsa-lib
-
-make_dirs () {
-    #为了方便管理，创建有关的目录
-    cd ${BASE} && mkdir compressed install source -p
-}
-
-tget () { #try wget
-    filename=`basename $1`
-    echo "Downloading [${filename}]..."
-    if [ ! -f ${filename} ];then
-        wget $1
-    fi
-
-    echo "[OK] Downloaded [${filename}] "
-}
 
 download_package () {
     cd ${BASE}/compressed
@@ -34,35 +17,32 @@ download_package () {
     tget ftp://ftp.alsa-project.org/pub/utils/alsa-utils-1.0.22.tar.bz2
 }
 
-tar_package () {
-    cd ${BASE}/compressed
-    ls * > /tmp/list.txt
-    for TAR in `cat /tmp/list.txt`
-    do
-        tar -xf $TAR -C  ../source
-    done
-    rm -rf /tmp/list.txt
-}
-
-make_alsa_lib () {
-    cd ${BASE}/source/alsa-lib*
-
+function make_alsa_lib () {
+function _make_sh () {
+cat<<EOF
      ./configure \
     --host=${BUILD_HOST} \
-    --prefix=${OUTPUT_PATH}/alsa-lib \
+    --prefix=${ALSALIB_DIR} \
     --enable-static \
     --enable-shared  \
+    --disable-mixer \
     --disable-Python \
-    --with-configdir=/usr/local/share 
+    --with-configdir=${ALSALIB_DIR}/share 
+EOF
     #--with-plugindir=/usr/local/lib/alsa_lib
+}
+    cd ${BASE}/source/alsa-lib*
 
-    sudo make && sudo make install
+    _make_sh > $tmp_config
+    source ./$tmp_config
+    make clean
+    make  $MKTHD && make install
 }
 
 
-make_alsa_utils () {
-    cd ${BASE}/source/alsa-utils*
-
+function make_alsa_utils () {
+function _make_sh () {
+cat<<EOF
     ./configure \
     --host=${BUILD_HOST} \
     --disable-alsamixer  \
@@ -72,16 +52,25 @@ make_alsa_utils () {
     --with-alsa-prefix=${ALSALIB_DIR}/lib  \
     --with-alsa-inc-prefix=${ALSALIB_DIR}/include  \
     --prefix=${OUTPUT_PATH}/alsa-utils
-
-    make && make install
+EOF
 }
-echo "Using ${BUILD_HOST}"
-make_dirs
-download_package
-tar_package
-make_alsa_lib
-make_alsa_utils
+    cd ${BASE}/source/alsa-utils*
 
+    _make_sh > $tmp_config
+    source ./$tmp_config || return 1
+
+    make clean
+    make  $MKTHD && make install
+}
+
+function make_build ()
+{
+    download_package || return 1
+    tar_package || return 1
+    make_alsa_lib || return 1
+    make_alsa_utils || return 1
+}
+make_build || echo "Err"
 exit $?
 以下内容针对板子
 

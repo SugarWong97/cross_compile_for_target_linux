@@ -1,0 +1,113 @@
+#!/bin/sh
+export BASE=`pwd`
+export tmp_config=my_config
+
+#export BUILD_HOST=arm-linux
+export BUILD_HOST=arm-none-linux-gnueabi
+export CODE_PATH=${BASE}/source/
+export OUTPUT_PATH=${BASE}/install/
+export BUILD_HOST_=""
+if [ -z "${BUILD_HOST}"  ]; then
+    #empty
+   export BUILD_HOST_=""
+else
+   export BUILD_HOST_=${BUILD_HOST}-
+fi
+export _CC="${BUILD_HOST_}gcc"
+export _CPP="${BUILD_HOST_}g++"
+export _LD="${BUILD_HOST_}ld"
+export _AR="${BUILD_HOST_}ar"
+export _RANLIB="${BUILD_HOST_}ranlib"
+export _STRIP="${BUILD_HOST_}strip"
+
+
+
+ZLIB=zlib-1.2.11
+function make_zlib () {
+function _make_sh () {
+cat<<EOF
+    CC=${_CC} ./configure --prefix=${OUTPUT_PATH}/${ZLIB}
+EOF
+}
+    # 编译安装 zlib （因为很多库用到了，所以放在这里）
+    cd ${CODE_PATH}/${ZLIB}
+
+    _make_sh > $tmp_config
+    source ./$tmp_config || return 1
+
+    make clean
+    make $MKTHD && make install
+}
+
+
+set_compile_env_for_target () {
+    export CC=${_CC}
+    export AR=${_AR}
+    export LD=${_LD}
+    export RANLIB=${_RANLIB}
+    export STRIP=${_STRIP}
+}
+
+## make 参数
+MKTHD="-j 30"
+## configure 参数生成的路径（用于调试）
+tmp_config=my_config
+
+## 必要时，填写你的工具链的所在路径
+BUILD_HOST_PATH=/opt/gcc-arm-linux-gnueabi/bin
+if [ -d "${BUILD_HOST_PATH}"  ]; then
+    export PATH=${PATH}:${BUILD_HOST_PATH}
+fi
+
+# 获取 工具链所在位置 下面的操作为的是在 CMakeLists.txt 中插入下面内容
+##export GCC_FULL_PATH=`whereis ${_CC} | awk -F: '{ print $2 }' | awk '{print $1}'` # 防止多个结果
+##export GCC_DIR=`dirname ${GCC_FULL_PATH}/`
+
+make_dirs () {
+    #为了方便管理，创建有关的目录
+    cd ${BASE} && mkdir compressed install source -p
+}
+
+function tget () { #try wget
+    filename=`basename $1`
+    echo "Downloading [${filename}]..."
+    if [ ! -f ${filename} ];then
+        wget $1
+    fi
+
+    echo "[OK] Downloaded [${filename}] "
+}
+
+tgit () { #try git and tar
+    filename=`basename $1 | sed 's/.git//g'`
+
+    echo "Clone [${filename}]..."
+    if [ ! -f ${filename}.tgz ];then
+        git clone $1
+        rm ${filename}/.git* -rf
+        echo "Making a tar file."
+        tar -zcf ${filename}.tgz ${filename}
+        rm ${filename} -rf
+    fi
+
+    echo "[OK] Cloned [${filename}] "
+}
+
+function tar_package () {
+    cd ${BASE}/compressed
+    find . -maxdepth 1 -mindepth 1 -type f > /tmp/list.txt
+    for TAR in `cat /tmp/list.txt`
+    do
+        echo "Untar $TAR..."
+        tar -xf $TAR -C  ${BASE}/source
+    done
+    rm -rf /tmp/list.txt
+}
+
+function require () {
+    echo "Checking [$1]"
+    command -v $1 >/dev/null 2>&1 || { echo >&2 "Aborted : Require \"$1\" but not found."; exit 1; }
+}
+
+make_dirs
+require ${_CC} || return 1

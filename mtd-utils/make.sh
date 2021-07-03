@@ -1,28 +1,18 @@
 ##
 #    Copyright By Schips, All Rights Reserved
-# 自定义变量
+#    https://gitee.com/schips/
 
-BUILD_HOST=arm-linux
-BASE=`pwd`
-OUTPUT_PATH=${BASE}/install
-ZLIB=zlib-1.2.11
+#    File Name:  make.sh
+#    Created  :  Fri 22 Nov 2019 11:49:30 AM CST
+
+##
+#!/bin/sh
+
+source ../.common
+
 MTD_UTILS=mtd-utils-1.4.8
 LZO=lzo-2.08
 E2FSPROGS=e2fsprogs-1.41.14
-
-make_dirs () {
-    #为了方便管理，创建有关的目录
-    cd ${BASE} && mkdir compressed install source -p
-}
-tget () { #try wget
-    filename=`basename $1`
-    echo "Downloading [${filename}]..."
-    if [ ! -f ${filename} ];then
-        wget $1 
-    fi
-
-    echo "[OK] Downloaded [${filename}] "
-}
 
 download_package () {
     cd ${BASE}/compressed
@@ -31,43 +21,38 @@ download_package () {
     tget http://www.oberhumer.com/opensource/lzo/download/${LZO}.tar.gz
     tget https://jaist.dl.sourceforge.net/project/e2fsprogs/e2fsprogs/1.41.14/${E2FSPROGS}.tar.gz
     tget ftp://ftp.infradead.org/pub/mtd-utils/${MTD_UTILS}.tar.bz2
-
 }
-
-tar_package () {
-    cd ${BASE}/compressed
-    ls * > /tmp/list.txt
-    for TAR in `cat /tmp/list.txt`
-    do
-        tar -xf $TAR -C  ../source
-    done
-    rm -rf /tmp/list.txt
-}
-
 
 #编译
-make_zlib () {
-    # 编译安装 zlib
-    cd ${BASE}/source/${ZLIB}
-    echo "ZLIB ABOUT"
-    CC=${BUILD_HOST}-gcc ./configure --prefix=${OUTPUT_PATH}/${ZLIB}
-    make && make install
+function make_lzo () {
+function _make_sh () {
+cat<<EOF
+    CC=${_CC} ./configure --host=arm-linux  --prefix=${OUTPUT_PATH}/${LZO}
+EOF
 }
-
-make_lzo () {
     # 编译安装 lzo
     cd ${BASE}/source/${LZO}
-    echo "LZO ABOUT"
-    CC=${BUILD_HOST}-gcc ./configure --host=arm-linux  --prefix=${OUTPUT_PATH}/${LZO}
-    make && make install
+
+    _make_sh > $tmp_config
+    source ./$tmp_config || return 1
+
+    make clean
+    make $MKTHD && make install
 }
 
-make_e2fsprogs () {
+function make_e2fsprogs () {
+function _make_sh () {
+cat<<EOF
+    CC=${_CC} ./configure --host=arm-linux --enable-elf-shlibs --prefix=${OUTPUT_PATH}/${E2FSPROGS}
+EOF
+}
     # 编译安装 e2fsprogs
     cd ${BASE}/source/${E2FSPROGS}
-    echo "E2FSPROGS ABOUT"
-    CC=${BUILD_HOST}-gcc ./configure --host=arm-linux --enable-elf-shlibs --prefix=${OUTPUT_PATH}/${E2FSPROGS}
-    make && make install-libs
+
+    _make_sh > $tmp_config
+    source ./$tmp_config || return 1
+
+    make $MKTHD && make install-libs
     mkdir ${OUTPUT_PATH}/${E2FSPROGS}/include/uuid -p
     cp lib/uuid/uuid.h ${OUTPUT_PATH}/${E2FSPROGS}/include/uuid
 }
@@ -77,6 +62,7 @@ do_copy() {
     rm *.o
     cp ${BASE}/source/${MTD_UTILS}/${BUILD_HOST}  ${OUTPUT_PATH}/${MTD_UTILS} -r
 }
+
 make_mtd_utils () {
     # 编译安装 mtd-utils
     cd ${BASE}/source/${MTD_UTILS}
@@ -87,7 +73,7 @@ make_mtd_utils () {
     mkdir mkfs.ubifs/uuid -p
     cp ${BASE}/source/${E2FSPROGS}/lib/uuid/uuid.h mkfs.ubifs/uuid/uuid.h
 
-    export CROSS=${BUILD_HOST}-
+    export CROSS=${BUILD_HOST_}
     export DESTDIR=${OUTPUT_PATH}/mtd-utils
     export ZLIBCPPFLAGS=-I${OUTPUT_PATH}/${ZLIB}/include
     export  LZOCPPFLAGS="-I${OUTPUT_PATH}/${LZO}/include -I{$OUTPUT_PATH}/${E2FSPROGS}/include/"
@@ -95,16 +81,19 @@ make_mtd_utils () {
     export   LZOLDFLAGS=-L${OUTPUT_PATH}/${LZO}/lib
     export   UUIDLDLIBS=-L${OUTPUT_PATH}/${E2FSPROGS}/lib
 
-    make WITHOUT_XATTR=1
+    make WITHOUT_XATTR=1 $MKTHD
     do_copy
 }
 
- echo "Using ${BUILD_HOST}-gcc"
-make_dirs
-download_package
-tar_package
-make_zlib
-make_lzo
-make_e2fsprogs
-make_mtd_utils
+function make_build ()
+{
+    download_package  || return 1
+    tar_package || return 1
 
+    make_zlib  || return 1
+    make_lzo  || return 1
+    make_e2fsprogs  || return 1
+    make_mtd_utils  || return 1
+}
+
+make_build || echo "Err"
