@@ -1,14 +1,24 @@
 #!/bin/sh
-export BASE=`pwd`
+## configure 参数生成的路径（用于调试）
 export tmp_config=my_config
+
+## make 参数
+MKTHD="-j 30"
 
 #export BUILD_HOST=arm-linux
 export BUILD_HOST=arm-none-linux-gnueabi
+## 必要时，填写你的工具链的所在路径
+BUILD_HOST_PATH=/opt/gcc-arm-linux-gnueabi/bin
+
+## 路径管理
+export BASE=`pwd`
 export CODE_PATH=${BASE}/source/
 export OUTPUT_PATH=${BASE}/install/
+export ARCHIVE_PATH=${BASE}/compressed
+
+## 工具链
 export BUILD_HOST_=""
 if [ -z "${BUILD_HOST}"  ]; then
-    #empty
    export BUILD_HOST_=""
 else
    export BUILD_HOST_=${BUILD_HOST}-
@@ -21,8 +31,9 @@ export _RANLIB="${BUILD_HOST_}ranlib"
 export _STRIP="${BUILD_HOST_}strip"
 
 
-
-ZLIB=zlib-1.2.11
+## 常见的移植
+### ZLIB
+export ZLIB=zlib-1.2.11
 function make_zlib () {
 function _make_sh () {
 cat<<EOF
@@ -43,8 +54,7 @@ function get_zlib () {
     tget https://www.zlib.net/${ZLIB}.tar.gz 
 }
 
-
-set_compile_env_for_target () {
+function set_compile_env_for_target () {
     export CC=${_CC}
     export AR=${_AR}
     export LD=${_LD}
@@ -52,13 +62,8 @@ set_compile_env_for_target () {
     export STRIP=${_STRIP}
 }
 
-## make 参数
-MKTHD="-j 30"
-## configure 参数生成的路径（用于调试）
-tmp_config=my_config
 
-## 必要时，填写你的工具链的所在路径
-BUILD_HOST_PATH=/opt/gcc-arm-linux-gnueabi/bin
+## 添加环境变量
 if [ -d "${BUILD_HOST_PATH}"  ]; then
     export PATH=${PATH}:${BUILD_HOST_PATH}
 fi
@@ -67,13 +72,15 @@ fi
 ##export GCC_FULL_PATH=`whereis ${_CC} | awk -F: '{ print $2 }' | awk '{print $1}'` # 防止多个结果
 ##export GCC_DIR=`dirname ${GCC_FULL_PATH}/`
 
-make_dirs () {
+function make_dirs () {
     #为了方便管理，创建有关的目录
-    cd ${BASE} && mkdir compressed install source -p
+    mkdir -pv $CODE_PATH
+    mkdir -pv $OUTPUT_PATH
+    mkdir -pv $ARCHIVE_PATH
 }
 
 function tget () { #try wget
-    filename=`basename $1`
+    local filename=`basename $1`
     echo "Downloading [${filename}]..."
     if [ ! -f ${filename} ];then
         wget $1
@@ -82,8 +89,8 @@ function tget () { #try wget
     echo "[OK] Downloaded [${filename}] "
 }
 
-tgit () { #try git and tar
-    filename=`basename $1 | sed 's/.git//g'`
+function tgit () { #try git and tar
+    local filename=`basename $1 | sed 's/.git//g'`
 
     echo "Clone [${filename}]..."
     if [ ! -f ${filename}.tgz ];then
@@ -98,14 +105,13 @@ tgit () { #try git and tar
 }
 
 function tar_package () {
-    cd ${BASE}/compressed
-    find . -maxdepth 1 -mindepth 1 -type f > /tmp/list.txt
-    for TAR in `cat /tmp/list.txt`
+    cd ${ARCHIVE_PATH}
+    for TAR in `find . -maxdepth 1 -mindepth 1 -type f`
     do
         echo "Untar $TAR..."
-        tar -xf $TAR -C  ${BASE}/source
+        tar -xf $TAR -C  ${CODE_PATH}
     done
-    rm -rf /tmp/list.txt
+    cd $BASE
 }
 
 function require () {
