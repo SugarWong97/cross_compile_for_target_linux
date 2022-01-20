@@ -49,10 +49,7 @@ make $MKTHD && make DESTDIR=${OUTPUT_PATH}/samba-${VERSION} install $MKTHD
 EOF
     ) > build.cmd
     bash build.cmd || return $?
-    cp ${BASE}/source/samba-${VERSION}/examples/smb.conf.default \
-        ${OUTPUT_PATH}/samba-${VERSION}/smb.conf
-    cp ${BASE}/source/samba-${VERSION}/examples/smb.conf.default \
-        ${OUTPUT_PATH}/samba-${VERSION}/${FINDIR}/lib/smb.conf
+    ## 新增安装帮助信息
 (
     cat <<EOF
 Let ${OUTPUT_PATH}/samba-${VERSION}/${FINDIR} to '${FINDIR}'"
@@ -65,6 +62,50 @@ e.g.:
      cp <nfs-path>/`basename ${FINDIR}` ${FINDIR}
 EOF
 )> ${OUTPUT_PATH}/samba-${VERSION}/install.path
+    ## 减小文件大小
+    find ${OUTPUT_PATH}/samba-${VERSION}/${FINDIR}/bin -type f | grep -v smbpasswd | grep -v smbd | grep -v nmbd | xargs rm -vf {}
+    find ${OUTPUT_PATH}/samba-${VERSION}/${FINDIR}/sbin -type f | grep -v smbpasswd | grep -v smbd | grep -v nmbd | xargs rm -vf {}
+    ${BUILD_HOST_}strip ${OUTPUT_PATH}/samba-${VERSION}/${FINDIR}/sbin/*
+    ${BUILD_HOST_}strip ${OUTPUT_PATH}/samba-${VERSION}/${FINDIR}/bin/*
+    ## 删除不必要的文件
+    ### 头文件
+    rm -rf ${OUTPUT_PATH}/samba-${VERSION}/${FINDIR}/include
+    ### man 文档
+    rm -rf ${OUTPUT_PATH}/samba-${VERSION}/${FINDIR}/share
+    ### swat 服务有关文件
+    rm -rf ${OUTPUT_PATH}/samba-${VERSION}/${FINDIR}/swat
+    rm -rf ${OUTPUT_PATH}/samba-${VERSION}/${FINDIR}/lib/*
+    ## 拷贝默认配置，并添加默认的配置
+    cp ${BASE}/source/samba-${VERSION}/examples/smb.conf.default \
+        ${OUTPUT_PATH}/samba-${VERSION}/${FINDIR}/lib/smb.conf
+#    ### 删掉home目录（当使用者登入samba server 后，samba 下会看到自己的家目录，目录名称是使用者自己的帐号）
+#    local home_line_start=`cat ${OUTPUT_PATH}/samba-${VERSION}/${FINDIR}/lib/smb.conf | grep -n -F "[homes]" | awk -F: '{print$1}'`
+#    local home_line_end=$((${home_line_start}+3))
+#    bash <<EOF
+##!/bin/bash
+#sed -i '$home_line_start,${home_line_end}d' ${OUTPUT_PATH}/samba-${VERSION}/${FINDIR}/lib/smb.conf
+#EOF
+
+    ### 关闭打印机
+    sed -r -i "/load printers/ s/.*/load printers=no/1" -i \
+        ${OUTPUT_PATH}/samba-${VERSION}/${FINDIR}/lib/smb.conf
+    #sed -r -i "/printable/ s/.*/printable = no/1" -i  ${OUTPUT_PATH}/samba-${VERSION}/${FINDIR}/lib/smb.conf
+    ### 添加默认共享目录share，对应的路径为/tmp
+    (
+    cat <<EOF
+[share]
+comment = SMB Share
+
+# change it as you want
+path = /tmp
+
+available = yes
+browseable = yes
+
+public = yes
+writable = yes
+EOF
+    ) >> ${OUTPUT_PATH}/samba-${VERSION}/${FINDIR}/lib/smb.conf
 }
 
 ## not support
