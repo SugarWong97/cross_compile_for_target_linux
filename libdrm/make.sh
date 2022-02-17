@@ -8,31 +8,29 @@
 #!/bin/zsh
 
 source ../.common
-
+export LIBDRM=libdrm-2.4.89
 LIBDRM_DIR=${OUTPUT_PATH}/libdrm
 
 download_libdrm () {
     #https://dri.freedesktop.org/libdrm/
-    tget https://dri.freedesktop.org/libdrm/libdrm-2.4.89.tar.bz2
+    tget https://dri.freedesktop.org/libdrm/${LIBDRM}.tar.bz2
 }
 
 function make_libdrm () {
-function _make_sh () {
-cat<<EOF
+bash <<EOF
+
+    cd ${CODE_PATH}/libdrm*
+
      ./configure \
     --host=${BUILD_HOST} \
     --prefix=${LIBDRM_DIR} \
-    --enable-static
+    --enable-static \
     --enable-shared
-EOF
     #--with-plugindir=/usr/local/lib/alsa_lib
-}
-    cd ${CODE_PATH}/libdrm*
 
-    _make_sh > $tmp_config
-    source ./$tmp_config
-    make clean
-    make  $MKTHD && make install
+    make  $MKTHD
+    make install
+EOF
 }
 
 function build_libdrm ()
