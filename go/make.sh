@@ -19,8 +19,8 @@ export GCC_FULL_PATH=`whereis ${_CC} | awk -F: '{ print $2 }' | awk '{print $1}'
 export GCC_DIR=`dirname ${GCC_FULL_PATH}/`
 CROSS_TOOL_DIR=${GCC_DIR}
 
-download_package () {
-    cd ${BASE}/compressed
+
+download_go () {
     # bootstap
     tget https://dl.google.com/go/go1.4.3.src.tar.gz
     # 高版本
@@ -28,43 +28,51 @@ download_package () {
 }
 
 tar_go_for_boot_stap () {
+    bash <<EOF
     cd ${BASE}/compressed
-
     mkdir ${BOOTSTRAP_DIR} -p
     tar -xf *go1.4* -C ${BOOTSTRAP_DIR}
+EOF
 }
 
 make_go_for_boot_stap () {
+    bash <<EOF
     cd ${BOOTSTRAP_DIR}/go/src
-
-    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 ./make.bash
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 bash ./make.bash
+EOF
 }
 
 function make_go_version_higher_host() {
 function tar_go_version_higher_host () {
+    bash <<EOF
     cd ${BASE}/compressed
-    HIGHER=`ls go* | grep -v 1.4 `
+    HIGHER=\`ls go* | sort -hr | grep -v 1.4 \`
 
     mkdir ${HIG_GO_DIR} -p
     tar -xf $HIGHER -C ${HIG_GO_DIR}
+EOF
 }
     # tar_go_version_higher_host  || return 1
+    bash <<EOF
     cd ${HIG_GO_DIR}/go/src
     GOOS=linux GOARCH=amd64 ./make.bash
+EOF
 }
 
 tar_go_version_higher_arm () {
+    bash <<EOF
     cd ${BASE}/compressed
-    HIGHER=`ls go* |grep -v 1.4 `
+    HIGHER=\`ls go* | sort -hr | grep -v 1.4 \`
     mkdir ${ARM_GO_DIR} -p
-    tar -xvf $HIGHER -C ${ARM_GO_DIR}
+    tar -xf \$HIGHER -C ${ARM_GO_DIR}
+EOF
 }
 
 make_go_version_higher_arm() {
-
+    bash <<EOF
     cd ${ARM_GO_DIR}/go/src
     CGO="no"
-    if [ $CGO = "yes" ]
+    if [ \$CGO = "yes" ]
     then
         echo "CGO is enable"
         # 开启CGO编译（参考下文）
@@ -76,6 +84,7 @@ make_go_version_higher_arm() {
         # 关闭CGO编译
         CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 ./make.bash
     fi
+EOF
 }
 
 reorganize () {
@@ -97,12 +106,15 @@ reorganize () {
     GOPATH=`dirname $GOROOT`/gopath
     echo "GOROOT is : ${GOROOT}"
     echo "GOPATH is : ${GOPATH}"
-
 }
 
 function make_build ()
 {
-    download_package  || return 1
+    if [ ! -d "/var/tmp" ]; then
+        sudo mkdir /var/tmp -p
+        sudo chmod 777 /var/tmp
+    fi
+    download_go  || return 1
     tar_go_for_boot_stap  || return 1
     make_go_for_boot_stap  || return 1
         #arm版本的编译里面也带了本机可以用的go，
