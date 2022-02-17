@@ -10,38 +10,33 @@
 
 source ../.common
 
-JPEG=jpegsrc.v9c
+export JPEG=jpegsrc.v9c
 JPEG_OUTPUT=${OUTPUT_PATH}/${JPEG}
 
-download_package () {
-    cd ${BASE}/compressed
-    #下载包
+function download_libjpeg () {
     tget    http://www.ijg.org/files/${JPEG}.tar.gz
 }
 
-function make_jpeg () {
-function _make_sh () {
-cat<<EOF
+function mk_libjpeg () {
+    bash <<EOF
+
+    cd ${BASE}/source/*
+
     ./configure \
     --prefix=${JPEG_OUTPUT}/ \
     --host=${BUILD_HOST}
-EOF
-}
-    cd ${BASE}/source/*
-
-    _make_sh > $tmp_config
-    source ./$tmp_config || return 1
 
     make clean
     make $MKTHD && make install
+EOF
 }
 
-function make_build ()
+function make_libjpeg ()
 {
-    download_package  || return 1
+    download_libjpeg  || return 1
     tar_package || return 1
 
-    make_jpeg  || return 1
+    mk_libjpeg  || return 1
 }
 
-make_build || echo "Err"
+make_libjpeg || echo "Err"
