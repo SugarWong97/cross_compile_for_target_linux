@@ -7,56 +7,26 @@
 
 ##
 #!/bin/sh
-BASE=`pwd`
-BUILD_HOST=arm-linux
 PVERSION=3.6.10
+source ../.common
 
-OUTPUT_PATH=${BASE}/install/
-
-make_dirs() {
-    cd ${BASE}
-    mkdir  compressed  install  source -p
-    sudo ls
-}
-
-tget () { #try wget
-    filename=`basename $1`
-    echo "Downloading [${filename}]..."
-    if [ ! -f ${filename} ];then
-        wget $1
-    fi
-
-    echo "[OK] Downloaded [${filename}] "
-}
-
-download_package () {
-    cd ${BASE}/compressed
-    #下载包
+download_python () {
     tget https://www.python.org/ftp/python/${PVERSION}/Python-${PVERSION}.tgz
 }
 
-
-tar_package () {
-    cd ${BASE}/compressed
-    ls * > /tmp/list.txt
-    for TAR in `cat /tmp/list.txt`
-    do
-        tar -xf $TAR -C  ../source
-    done
-    rm -rf /tmp/list.txt
-}
-
 make_host () {
+    bash <<EOF
     cd ${BASE}/source/Python-${PVERSION}
     ./configure
     make && sudo make install
     #sudo rm /usr/bin/python
     #sudo ln -s /usr/local/bin/python3 /usr/bin/python
+EOF
 }
 
 make_target () {
+    bash <<EOF
     cd ${BASE}/source/Python-${PVERSION}
-    echo `pwd`
     sudo make clean
     mkdir bulid-${BUILD_HOST} -p
     cd  bulid-${BUILD_HOST}
@@ -70,6 +40,7 @@ make_target () {
     --enable-optimizations \
     ac_cv_file__dev_ptmx=yes ac_cv_file__dev_ptc=yes
     make && make install
+EOF
 }
 
 make_python_copy() {
@@ -78,10 +49,10 @@ make_python_copy() {
 }
 
 make_dirs
-download_package
+download_python
 tar_package
 make_python_copy
-make_host
+#make_host
 make_target
 exit $?
 
