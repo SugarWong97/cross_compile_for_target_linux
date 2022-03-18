@@ -62,7 +62,7 @@ bash <<EOF
     cd ${ARCHIVE_PATH}
     echo "Downloading [${filename}]..."
     if [ ! -f ${filename} ];then
-        wget $1
+        wget "$@"
     fi
 
     echo "[OK] Downloaded [${filename}] "
@@ -92,8 +92,15 @@ bash <<EOF
     cd ${ARCHIVE_PATH}
     for TAR in \`find . -maxdepth 1 -mindepth 1 -type f\`
     do
-        echo "Untar \$TAR..."
-        tar -xf \$TAR -C  ${CODE_PATH}
+        tarfile=\`basename \$TAR\`
+        filename=\`echo \${tarfile}| sed 's/.tar.gz//'| sed 's/.tgz//'| sed 's/.tar.bz2//'\`
+        #if [ ! -d "${CODE_PATH}/\`basename \$TAR\`" ]; then
+        if [ ! -d "${CODE_PATH}/\${filename}" ]; then
+            echo "Untar \$tarfile..."
+            tar -xf \$TAR -C  ${CODE_PATH}
+        else
+            echo "Skip \$tarfile..."
+        fi
     done
 EOF
 }
