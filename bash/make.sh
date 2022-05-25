@@ -1,0 +1,63 @@
+##
+#    Copyright By Schips, All Rights Reserved
+#    https://gitee.com/schips/
+
+#    File Name:  make.sh
+#    Created  :  Fri 22 Nov 2019 11:49:30 AM CST
+
+##
+#!/bin/sh
+
+source ../.common
+
+export _BASH_VERSION=4.3
+BASH_OUTPUT=${OUTPUT_PATH}/bash
+
+function download_bash () {
+    #tget    https://ftp.gnu.org/gnu/bash/bash-5.1.8.tar.gz
+    tget    https://ftp.gnu.org/gnu/bash/bash-${_BASH_VERSION}.tar.gz
+}
+
+function mk_ () {
+    bash <<EOF
+
+    cd ${BASE}/source
+    cd \`ls ${BASE}/source | tail -n 1\`
+
+    ./configure CC=${_CC} --prefix=${BASH_OUTPUT} \
+        --host=arm-linux \
+        --target=${BUILD_HOST} \
+        --enable-history \
+        --without-bash-malloc  \
+        --cache-file=arm-linux.cache
+    make clean
+    make $MKTHD && make install
+EOF
+}
+
+function echo_help ()
+{
+    cat <<EOF
+ok
+-------------安装-------------
+1. 将 install/bin中的 bash 文件复制至开发板 /bin 中
+2. 修改 开发板中 /bin/bash 权限 : "chmod +x /bin/bash"
+3. 执行 "val1=15; val2=1; and=\$[ \$val1 & \$val2 ]; echo \$and"，理论上ash会有错误产生
+4. 输入bash，再执行上面的命令，预期正确的打印
+
+-------------默认-------------
+1. 备份原有的sh: "cd /bin; mv sh sh.old"
+2. 修改: "ln -s bash sh"
+EOF
+}
+
+function make_bash ()
+{
+    download_bash  || return 1
+    tar_package || return 1
+
+    mk_  || return 1
+    echo_help
+}
+
+make_bash || echo "Err"
