@@ -27,11 +27,10 @@ cat<<EOF
     ./configure \
     --host=${BUILD_HOST} \
     --enable-shared \
-    --enable-static \
     --enable-pic \
     --prefix=${X264_OUTPUT_PATH} \
     --cross-prefix=${BUILD_HOST_} \
-    --disable-asm 
+    --disable-asm
 EOF
 }
     cd ${BASE}/source/x264*
@@ -131,10 +130,10 @@ function make_build ()
 {
     require cmake || return 1
     download_package  || return 1
-    #tar_package || return 1
-    #make_x264 || return 1
-    #make_x265 || return 1
-    #prepare_other_lib || return 1
+    tar_package || return 1
+    make_x264 || return 1
+    make_x265 || return 1
+    prepare_other_lib || return 1
     make_ffmpeg
 }
 
