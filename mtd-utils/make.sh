@@ -12,14 +12,16 @@ source ../.common
 
 MTD_UTILS=mtd-utils-1.4.8
 LZO=lzo-2.08
-E2FSPROGS=e2fsprogs-1.41.14
+#E2FSPROGS=e2fsprogs-1.41.14
+E2FSPROGS=e2fsprogs-1.42.12
 
 download_package () {
     cd ${BASE}/compressed
 
-    tget https://www.zlib.net/${ZLIB}.tar.gz 
+    tget https://www.zlib.net/${ZLIB}.tar.gz
     tget http://www.oberhumer.com/opensource/lzo/download/${LZO}.tar.gz
-    tget https://jaist.dl.sourceforge.net/project/e2fsprogs/e2fsprogs/1.41.14/${E2FSPROGS}.tar.gz
+    #tget https://jaist.dl.sourceforge.net/project/e2fsprogs/e2fsprogs/1.41.14/${E2FSPROGS}.tar.gz
+    tget https://jaist.dl.sourceforge.net/project/e2fsprogs/e2fsprogs/v1.42.12/e2fsprogs-1.42.12.tar.gz
     tget ftp://ftp.infradead.org/pub/mtd-utils/${MTD_UTILS}.tar.bz2
 }
 
@@ -43,7 +45,7 @@ EOF
 function make_e2fsprogs () {
 function _make_sh () {
 cat<<EOF
-    CC=${_CC} ./configure --host=arm-linux --enable-elf-shlibs --prefix=${OUTPUT_PATH}/${E2FSPROGS}
+    CC=${_CC} ./configure --host=arm-linux --enable-elf-shlibs --prefix=${OUTPUT_PATH}/${E2FSPROGS} --without-libintl-prefix
 EOF
 }
     # 编译安装 e2fsprogs
