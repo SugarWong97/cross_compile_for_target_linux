@@ -17,10 +17,10 @@ download_package () {
 }
 
 make_taget () {
-    cd ${BASE}/source/*
-    mkdir -p ${OUTPUT_PATH}/i2c-tools_arm
+    cd ${BASE}/source/i2c-tools_3*
+    mkdir -p ${OUTPUT_PATH}/i2c-tools
     CC=${_CC} LD=${_LD} make
-    make install prefix=${OUTPUT_PATH}/i2c-tools_arm
+    make install prefix=${OUTPUT_PATH}/i2c-tools
 }
 
 function make_build ()
