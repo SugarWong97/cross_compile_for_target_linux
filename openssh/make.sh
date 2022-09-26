@@ -8,7 +8,7 @@
 
 source ../.common
 OPENSSL=openssl-1.0.2t
-OPENSSH=openssh-4.6p1
+OPENSSH=openssh-6.6p1
 
 FIN_INSTALL=/usr/local
 
@@ -74,10 +74,11 @@ do_copy () {
 
 make_key () {
     cd ${BASE}/source/${OPENSSH}
-    ssh-keygen -t rsa   -f  ssh_host_key -N ""
-    ssh-keygen -t rsa   -f  ssh_host_rsa_key -N ""
-    ssh-keygen -t dsa   -f  ssh_host_dsa_key -N ""
-    ssh-keygen -t ecdsa -f  ssh_host_ecdsa_key -N ""
+    ssh-keygen -t rsa       -f  ssh_host_key -N         ""
+    ssh-keygen -t rsa       -f  ssh_host_rsa_key -N     ""
+    ssh-keygen -t dsa       -f  ssh_host_dsa_key -N     ""
+    ssh-keygen -t ecdsa     -f  ssh_host_ecdsa_key -N   ""
+    ssh-keygen -t ed25519   -f  ssh_host_ed25519_key -N ""
 
     #将生成的 ssh_host_*_key这4个文件copy到目标板的 $FIN_INSTALL/etc/目录下
     cp ssh_host*key ${OUTPUT_PATH}/${OPENSSH}/etc
@@ -88,6 +89,7 @@ make_ssh () {
     cd ${BASE}/source/${OPENSSH}
     ./configure \
     --host=${BUILD_HOST} \
+    --build=i386 \
     --prefix=${FIN_INSTALL} \
     --with-libs --with-zlib=${OUTPUT_PATH}/${ZLIB} \
     --with-ssl-dir=${OUTPUT_PATH}/${OPENSSL} \
@@ -97,6 +99,28 @@ make_ssh () {
 
     make $MKTHD # 不能执行 install
 EOF
+}
+
+gen_target_linux_cmd () {
+    (
+    cat <<EOF
+mkdir -vp /usr/local/bin/
+mkdir -vp /usr/local/lib/
+mkdir -vp /usr/local/sbin/
+mkdir -vp /usr/local/etc/
+mkdir -vp /usr/local/libexec/
+mkdir -vp /var/run/
+mkdir -vp /var/empty/
+
+cp -rfv  ${OPENSSH}/*          ${FIN_INSTALL}/
+cp -rfv  ${OPENSSL}/lib/*.so*  ${FIN_INSTALL}/lib/
+cp -rfv  ${ZLIB}/lib/*.so*     ${FIN_INSTALL}/lib/
+
+cp /etc/passwd  /etc/passwd_bak
+echo "sshd:x:74:74:Privilege-separated SSH:/var/empty/sshd:/sbin/nologin" >> /etc/passwd
+EOF
+) > ${OUTPUT_PATH}/install_helper
+    chmod +x ${OUTPUT_PATH}/install_helper
 }
 
 cc_ssh ()
@@ -109,5 +133,6 @@ cc_ssh ()
     make_ssh  || { echo >&2 "make_ssh "; exit 1; }
     do_copy   || { echo >&2 "do_copy "; exit 1; }
     make_key  || { echo >&2 "make_key "; exit 1; }
+    gen_target_linux_cmd
 }
 cc_ssh
