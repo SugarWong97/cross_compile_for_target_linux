@@ -13,6 +13,9 @@ ARM_GO_DIR=${CODE_PATH}/_arm_go
 HIG_GO_DIR=${CODE_PATH}/_go_higher
 BOOTSTRAP_DIR=${CODE_PATH}/_go_boot_strap
 
+# 最终安装go的地方
+GOROOT="${OUTPUT_PATH}/go_arm"
+
 export GOROOT_BOOTSTRAP=${BOOTSTRAP_DIR}/go
 
 export GCC_FULL_PATH=`whereis ${_CC} | awk -F: '{ print $2 }' | awk '{print $1}'` # 防止多个结果
@@ -95,17 +98,36 @@ reorganize () {
     #mv ${HIG_GO_DIR}/go  ${BASE}/install/go_host
 
     #higher_arm
-    mv ${ARM_GO_DIR}/go ${OUTPUT_PATH}/go_arm
+    mv ${ARM_GO_DIR}/go ${GOROOT}
 
     echo "go bootstarp  is  : $GOROOT_BOOTSTRAP"
     echo "CC_FOR_TARGET  is : ${CROSS_TOOL_DIR}/${BUILD_HOST}-gcc"
     echo "CXX_FOR_TARGET is : ${CROSS_TOOL_DIR}/${BUILD_HOST}-g++"
 
-    # 关于下方的变量请参考有关文章
-    GOROOT="${OUTPUT_PATH}/go_host"
     GOPATH=`dirname $GOROOT`/gopath
-    echo "GOROOT is : ${GOROOT}"
-    echo "GOPATH is : ${GOPATH}"
+
+cat <<EOF
+====================================================
+
+# 可以将下列信息写入profile中
+# 关于下方的变量请参考有关文章
+
+## 设置 GOROOT_BOOTSTRAP是为了下次 编译的时候可以用
+#export GOROOT_BOOTSTRAP=$GOROOT_BOOTSTRAP
+#export CC_FOR_TARGET=${CROSS_TOOL_DIR}/${BUILD_HOST}-gcc
+export CXX_FOR_TARGET=${CROSS_TOOL_DIR}/${BUILD_HOST}-g++
+
+## go必需的
+export GOROOT=$GOROOT
+export GOPATH=${GOPATH}
+export PATH=\$PATH:\$GOROOT/bin:\$GOPATH/bin
+
+## 可选的，快捷命令
+alias arm-go="GOOS=linux GOARCH=arm GOARM=7 go build"
+alias gob="go build"
+
+====================================================
+EOF
 }
 
 function make_build ()
