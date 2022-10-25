@@ -85,6 +85,11 @@ make_key () {
 }
 
 make_ssh () {
+
+    # 如果ssl是so库，在后续的很多时候都会需要考虑环境变量的问题
+    echo "ALLOW STATIC LINK ONLY"
+    rm -v -rf ${OUTPUT_PATH}/${OPENSSL}/lib/*.so*
+
     bash <<EOF
     cd ${BASE}/source/${OPENSSH}
     ./configure \
