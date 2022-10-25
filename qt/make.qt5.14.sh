@@ -2,8 +2,7 @@
 #    Copyright By Schips, All Rights Reserved
 #    https://gitee.com/schips/
 
-#    File Name:  make.qt5.9.sh
-#    Created  :  Sun 5 Dec 2021 17:09:30 PM CST
+#    File Name:  make.qt5.14.sh
 
 ##
 #!/bin/bash
@@ -11,7 +10,6 @@
 source ../.common
 
 BASE=`pwd`
-BUILD_HOST=arm-linux-gnueabi-
 XPLATFORM=linux-diy-arm-g++
 
 OUTPUT=${BASE}/install/
@@ -25,8 +23,7 @@ download_package () {
     cd ${BASE}/compressed
     #下载包
     tget https://github.com/libts/tslib/releases/download/1.4/tslib-1.4.tar.bz2
-    tget http://mirrors.ustc.edu.cn/qtproject/archive/qt/5.9/5.9.9/single/qt-everywhere-opensource-src-5.9.8.tar.xz
-    #tget https://download.qt.io/archive/qt/5.9/5.9.9/single/qt-everywhere-opensource-src-5.9.9.tar.xz
+    tget https://download.qt.io/archive/qt/5.14/5.14.2/single/qt-everywhere-src-5.14.2.tar.xz
 }
 
 do_fix () {
@@ -66,7 +63,7 @@ make_tslib () {
 }
 
 pre_configure_xplatform () {
-    cd ${BASE}/source/qt*5.9*
+    cd ${BASE}/source/qt*5.14*
     [ -d  qtbase/mkspecs/${XPLATFORM} ] && rm qtbase/mkspecs/${XPLATFORM} -r
     cp qtbase/mkspecs/linux-arm-gnueabi-g++ -r qtbase/mkspecs/${XPLATFORM}
     cd qtbase/mkspecs/${XPLATFORM}
@@ -89,9 +86,8 @@ pre_configure_xplatform () {
 
 }
 
-
 configure_qt_with_tslib () {
-    cd ${BASE}/source/qt*5.9*
+    cd ${BASE}/source/qt*5.14*
     ./configure \
     -v \
     -prefix ${OUTPUT}/qt \
@@ -99,7 +95,9 @@ configure_qt_with_tslib () {
     -qt-libpng -qt-libjpeg \
     -opensource \
     -confirm-license \
+    -make libs \
     -xplatform ${XPLATFORM} \
+    -no-opengl -no-ico -shared \
     -nomake examples -nomake tools -nomake tests \
     -linuxfb \
     -qt-freetype \
@@ -111,8 +109,6 @@ configure_qt_with_tslib () {
     -pch \
     -qt-zlib \
     -qt-sqlite \
-    -tslib \
-    -no-opengl \
     -no-sse2 \
     -no-openssl \
     -no-glib \
@@ -121,17 +117,19 @@ configure_qt_with_tslib () {
     -no-separate-debug-info \
     -no-pkg-config \
     -skip qt3d \
+    -tslib \
+    -I${OUTPUT}/tslib/include  -L${OUTPUT}/tslib/lib \
     -skip qtcanvas3d \
     -skip qtdeclarative \
     -no-iconv \
-    -I${OUTPUT}/tslib/include  -L${OUTPUT}/tslib/lib \
     2>&1 | tee ${BASE}/install/.qt.configure.log
 # -plugin-sql-sqlite \
 #   -strip \
+#    -no-opengl -no-ico -strip -shared \
 }
 
 configure_qt_without_tslib () {
-    cd ${BASE}/source/qt*5.9*
+    cd ${BASE}/source/qt*5.14*
     ./configure \
     -v \
     -prefix ${OUTPUT}/qt \
@@ -139,7 +137,9 @@ configure_qt_without_tslib () {
     -qt-libpng -qt-libjpeg \
     -opensource \
     -confirm-license \
+    -make libs \
     -xplatform ${XPLATFORM} \
+    -no-opengl -no-ico -shared \
     -nomake examples -nomake tools -nomake tests \
     -linuxfb \
     -qt-freetype \
@@ -169,7 +169,7 @@ configure_qt_without_tslib () {
 }
 
 make_qt () {
-    cd ${BASE}/source/qt*5.9*
+    cd ${BASE}/source/qt*5.14*
     make -j32   2>&1 | tee ${BASE}/install/.qt.make.log && make install
 }
 
@@ -226,8 +226,9 @@ make_dirs
 setup_env
 download_package
 tar_package
-make_tslib
+#make_tslib
 pre_configure_xplatform
 #configure_qt_with_tslib
 configure_qt_without_tslib
 make_qt
+make_profile > $OUTPUT/qt.profile

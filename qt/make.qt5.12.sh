@@ -11,7 +11,6 @@
 source ../.common
 
 BASE=`pwd`
-BUILD_HOST=arm-linux-gnueabi-
 XPLATFORM=linux-diy-arm-g++
 
 OUTPUT=${BASE}/install/
@@ -55,7 +54,7 @@ make_tslib () {
     make distclean
     echo "ac_cv_func_malloc_0_nonnull=yes" > arm-linux.cache
 
-    CC=${BUILD_HOST}gcc \
+    CC=${BUILD_HOST_}gcc \
     ./configure --host=arm-linux \
     --prefix=${OUTPUT}/tslib \
     --cache-file=arm-linux.cache  \
@@ -71,21 +70,21 @@ pre_configure_xplatform () {
     cd qtbase/mkspecs/${XPLATFORM}
 
     # qmake.conf
-    sed -r -i "/QMAKE_CC/ s/.*/QMAKE_CC \t\t= ${BUILD_HOST}gcc/"               qmake.conf
-    sed -r -i "/QMAKE_CXX/ s/.*/QMAKE_CXX \t\t= ${BUILD_HOST}g++/"             qmake.conf
-    sed -r -i "/QMAKE_LINK / s/.*/QMAKE_LINK \t\t= ${BUILD_HOST}g++/"          qmake.conf
-    sed -r -i "/QMAKE_LINK_SHLIB/ s/.*/QMAKE_LINK_SHLIB \t= ${BUILD_HOST}g++/" qmake.conf
+    sed -r -i "/QMAKE_CC/ s/.*/QMAKE_CC \t\t= ${BUILD_HOST_}gcc/"               qmake.conf
+    sed -r -i "/QMAKE_CXX/ s/.*/QMAKE_CXX \t\t= ${BUILD_HOST_}g++/"             qmake.conf
+    sed -r -i "/QMAKE_LINK / s/.*/QMAKE_LINK \t\t= ${BUILD_HOST_}g++/"          qmake.conf
+    sed -r -i "/QMAKE_LINK_SHLIB/ s/.*/QMAKE_LINK_SHLIB \t= ${BUILD_HOST_}g++/" qmake.conf
 
-    sed -r -i "/QMAKE_AR/ s/.*/QMAKE_AR \t\t= ${BUILD_HOST}ar cqs/"            qmake.conf
-    sed -r -i "/QMAKE_OBJCOPY/ s/.*/QMAKE_OBJCOPY \t\t= ${BUILD_HOST}objcopy/" qmake.conf
-    sed -r -i "/QMAKE_NM/ s/.*/QMAKE_NM \t\t= ${BUILD_HOST}nm -P/"             qmake.conf
-    sed -r -i "/QMAKE_STRIP/ s/.*/QMAKE_STRIP \t\t= ${BUILD_HOST}strip/"       qmake.conf
+    sed -r -i "/QMAKE_AR/ s/.*/QMAKE_AR \t\t= ${BUILD_HOST_}ar cqs/"            qmake.conf
+    sed -r -i "/QMAKE_OBJCOPY/ s/.*/QMAKE_OBJCOPY \t\t= ${BUILD_HOST_}objcopy/" qmake.conf
+    sed -r -i "/QMAKE_NM/ s/.*/QMAKE_NM \t\t= ${BUILD_HOST_}nm -P/"             qmake.conf
+    sed -r -i "/QMAKE_STRIP/ s/.*/QMAKE_STRIP \t\t= ${BUILD_HOST_}strip/"       qmake.conf
     sed -r -i '3a\QT_QPA_DEFAULT_PLATFORM = linuxfb'                           qmake.conf
     sed -r -i '3a\QT_QPA_PLATFORM = linuxfb'                                   qmake.conf
 
     #sed -i 'N;20a\QMAKE_INCDIR += ${OUTPUT}/tslib/include' qmake.conf
     #sed -i 'N;20a\QMAKE_LIBDIR += ${OUTPUT}/tslib/lib'     qmake.conf
-    
+
 }
 
 configure_qt_with_tslib () {
@@ -124,8 +123,8 @@ configure_qt_with_tslib () {
     -skip qtdeclarative \
     -no-iconv \
     2>&1 | tee ${BASE}/install/.qt.configure.log
-# -plugin-sql-sqlite \  
-#   -strip \ 
+# -plugin-sql-sqlite \
+#   -strip \
 }
 
 configure_qt_without_tslib () {
@@ -162,8 +161,8 @@ configure_qt_without_tslib () {
     -skip qtdeclarative \
     -no-iconv \
     2>&1 | tee ${BASE}/install/.qt.configure.log
-# -plugin-sql-sqlite \  
-#   -strip \ 
+# -plugin-sql-sqlite \
+#   -strip \
 }
 
 make_qt () {
