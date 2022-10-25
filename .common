@@ -25,6 +25,7 @@ else
 fi
 export _CC="${BUILD_HOST_}gcc"
 export _CPP="${BUILD_HOST_}g++"
+export _CXX="${BUILD_HOST_}g++"
 export _LD="${BUILD_HOST_}ld"
 export _AR="${BUILD_HOST_}ar"
 export _RANLIB="${BUILD_HOST_}ranlib"
@@ -33,6 +34,7 @@ export _STRIP="${BUILD_HOST_}strip"
 
 function set_compile_env_for_target () {
     export CC=${_CC}
+    export CXX=${_CXX}
     export AR=${_AR}
     export LD=${_LD}
     export RANLIB=${_RANLIB}
