@@ -3,7 +3,7 @@
 #    https://gitee.com/schips/
 
 #    File Name:  make.sh
-#    Created  :  Fri 22 Nov 2019 11:49:30 AM CST
+#    Created  :  Mon Aug 22 23:12:26 2022
 
 ##
 #!/bin/sh
@@ -22,6 +22,10 @@ make_iproute2 () {
 
     cp -v ${BASE}/meta/${IP_ROUTE2}/Makefile $CODE_PATH/${IP_ROUTE2}
     cp -v ${BASE}/meta/${IP_ROUTE2}/config.mk $CODE_PATH/${IP_ROUTE2}
+
+    file_replace_match_lines $CODE_PATH/${IP_ROUTE2}/config.mk "my_custom_ar" "AR:=${_AR}"
+    file_replace_match_lines $CODE_PATH/${IP_ROUTE2}/config.mk "my_custom_cc" "CC:=${_CC}"
+
     cd $CODE_PATH/${IP_ROUTE2}
 
 

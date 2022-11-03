@@ -20,8 +20,8 @@ ifeq ($(VERBOSE), 0)
     QUIET_LEX      = @echo '    LEX      '$@;
 endif
 PKG_CONFIG:=pkg-config
-AR:=ar
-CC:=aarch64-himix100-linux-gcc
+AR:=my_custom_ar
+CC:=my_custom_cc
 YACC:=bison
 TC_CONFIG_NO_XT:=y
 IP_CONFIG_SETNS:=y
