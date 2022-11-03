@@ -107,6 +107,23 @@ bash <<EOF
 EOF
 }
 
+# 将含有关键字的行替换为新的内容
+function file_replace_match_lines(){
+    local fin=$1
+    local old=$2
+    local new=$3
+    if [ -z "$fin" ]; then
+        echo "$0 file old new"
+        return 1
+    fi
+    local oldt=`echo $old| sed 's:\/:\\\/:g'`
+    local newt=`echo $new| sed 's:\/:\\\/:g'`
+    bash <<EOF
+sed -r -i "/$oldt/ s/.*/$newt/1" -i $fin
+EOF
+
+}
+
 function require () {
     echo "Checking [$1]"
     command -v $1 >/dev/null 2>&1 || { echo >&2 "Aborted : Require \"$1\" but not found."; exit 1; }
