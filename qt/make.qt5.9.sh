@@ -25,7 +25,7 @@ download_package () {
     cd ${BASE}/compressed
     #下载包
     tget https://github.com/libts/tslib/releases/download/1.4/tslib-1.4.tar.bz2
-    tget http://mirrors.ustc.edu.cn/qtproject/archive/qt/5.9/5.9.9/single/qt-everywhere-opensource-src-5.9.8.tar.xz
+    tget http://mirrors.ustc.edu.cn/qtproject/archive/qt/5.9/5.9.9/single/qt-everywhere-opensource-src-5.9.9.tar.xz
     #tget https://download.qt.io/archive/qt/5.9/5.9.9/single/qt-everywhere-opensource-src-5.9.9.tar.xz
 }
 
@@ -226,8 +226,11 @@ make_dirs
 setup_env
 download_package
 tar_package
-make_tslib
 pre_configure_xplatform
+
+#make_tslib
 #configure_qt_with_tslib
 configure_qt_without_tslib
+
 make_qt
+make_profile > $OUTPUT/qt.profile

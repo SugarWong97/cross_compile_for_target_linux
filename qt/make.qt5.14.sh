@@ -226,9 +226,11 @@ make_dirs
 setup_env
 download_package
 tar_package
-#make_tslib
 pre_configure_xplatform
+
+#make_tslib
 #configure_qt_with_tslib
 configure_qt_without_tslib
+
 make_qt
 make_profile > $OUTPUT/qt.profile
