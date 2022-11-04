@@ -19,9 +19,7 @@ ALL_OTHERS=${OUTPUT_PATH}/.all_others
 download_upx () {
     get_zlib
     tget  http://www.oberhumer.com/opensource/ucl/download/ucl-1.03.tar.gz
-    #tget https://github.com/upx/upx/archive/refs/tags/v3.00.tar.gz
     tget  https://github.com/upx/upx/releases/download/v3.96/upx-3.96-src.tar.xz
-    #tget https://github.com/upx/upx/releases/download/v4.0.0/upx-4.0.0-arm_linux.tar.xz
 }
 
 function _file_replace_string(){
@@ -41,41 +39,6 @@ sed 's/$oldt/$newt/gI' -i $fin
 EOF
         echo "Replace [$old](ncs) to [$new] in [$fin]."
     fi
-}
-
-
-# 编译安装 ssl
-make_ssl () {
-    cd ${BASE}/source/${OPENSSL}
-    echo "SSL ABOUT"
-    CC=${_CC} ./config no-asm shared --prefix=${OUTPUT_PATH}/${OPENSSL}
-
-    sed 's/-m64//g'  -i Makefile # 删除-m64 关键字 (arm-gcc 不支持)
-    #sudo mv /usr/bin/pod2man /usr/bin/pod2man_bak
-    #mv doc/apps /tmp/
-    pre_make_ssl
-    make $MKTHD && make install
-}
-
-## ssh 要求不能修改 prefix
-do_copy () {
-    cd ${BASE}/source/${OPENSSH}
-    mkdir ${OUTPUT_PATH}/${OPENSSH}/bin -p
-    mkdir ${OUTPUT_PATH}/${OPENSSH}/sbin -p
-    mkdir ${OUTPUT_PATH}/${OPENSSH}/etc -p
-    mkdir ${OUTPUT_PATH}/${OPENSSH}/libexec -p
-
-    cp -v scp  sftp  ssh  ssh-add  ssh-agent \
-        ssh-keygen  ssh-keyscan         ${OUTPUT_PATH}/${OPENSSH}/bin
-    cp -v moduli ssh_config sshd_config ${OUTPUT_PATH}/${OPENSSH}/etc
-    cp -v sftp-server  ssh-keysign      ${OUTPUT_PATH}/${OPENSSH}/libexec
-    cp -v sshd                          ${OUTPUT_PATH}/${OPENSSH}/sbin
-
-    #scp  sftp  ssh  ssh-add  ssh-agent  ssh-keygen  ssh-keyscan  拷贝到目标板/usr/local/bin
-    #moduli ssh_config sshd_config拷贝到目标板 /usr/local/etc
-    #sftp-server  ssh-keysign 拷贝到目标板 /usr/local/libexec
-    #sshd 拷贝到目标板 /usr/local/sbin/
-    echo "Copy all dirs under $FIN_INSTALL" > ${OUTPUT_PATH}/${OPENSSH}/install_path
 }
 
 make_ucl () {
