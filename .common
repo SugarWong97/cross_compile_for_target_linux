@@ -71,6 +71,27 @@ bash <<EOF
 EOF
 }
 
+# 适用于 例如github等情况 https://github.com/<author>/<repo>/archive/refs/tags/va.b.c.tar.gz
+# $1 : url
+# $2 : local file name
+function tget_and_rename () { #try wget
+    local filename=`basename $1`
+    local output="$2"
+    if [ ! -z "$output" ]; then
+        filename="$output"
+    fi
+    echo $all
+bash <<EOF
+    cd ${ARCHIVE_PATH}
+    echo "Downloading [${filename}]..."
+    if [ ! -f ${filename} ];then
+        wget $1 -O $filename
+    fi
+
+    echo "[OK] Downloaded [${filename}] "
+EOF
+}
+
 function tgit () { #try git and tar
     local filename=`basename $1 | sed 's/.git//g'`
 
