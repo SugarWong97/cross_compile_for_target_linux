@@ -8,7 +8,8 @@
 
 source ../.common
 OPENSSL=openssl-1.0.2t
-OPENSSH=openssh-6.6p1
+#OPENSSH=openssh-6.6p1
+OPENSSH=openssh-9.1p1
 
 FIN_INSTALL=/usr/local
 
