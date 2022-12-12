@@ -32,7 +32,8 @@ make_iproute2 () {
     make CC=${_CC} PREFIX=${IP_ROUTE2_INSTALL} || return -1
 
     mkdir -p ${IP_ROUTE2_INSTALL}
-    cp -v $CODE_PATH/${IP_ROUTE2}/ip/ip ${IP_ROUTE2_INSTALL}
+    mkdir -p ${IP_ROUTE2_INSTALL}/bin
+    cp -v $CODE_PATH/${IP_ROUTE2}/ip/ip ${IP_ROUTE2_INSTALL}/bin
 
     #make WITHOUT_XATTR=1 $MKTHD
     #do_copy
