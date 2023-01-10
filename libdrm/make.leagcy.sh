@@ -28,7 +28,7 @@ bash <<EOF
     --prefix=${LIBDRM_DIR} \
     --disable-nouveau \
     --enable-static \
-    --enable-shared
+    --enable-install-test-programs
     #--with-plugindir=/usr/local/lib/alsa_lib
 
     make  $MKTHD
