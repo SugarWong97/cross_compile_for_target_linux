@@ -23,7 +23,7 @@ download_ssh () {
 # 删除不需要的Makefile的doc规则
 # 这部分规则容易引起Makefile死循环
 pre_make_ssl () {
-    cd ${BASE}/source/${OPENSSL}
+    cd ${CODE_PATH}/${OPENSSL}
     startLine=`sed -n '/install_html_docs\:/=' Makefile`
     echo $startLine
     for startline in $startLine # 避免多行结果
@@ -41,7 +41,7 @@ pre_make_ssl () {
 
 # 编译安装 ssl
 make_ssl () {
-    cd ${BASE}/source/${OPENSSL}
+    cd ${CODE_PATH}/${OPENSSL}
     echo "SSL ABOUT"
     CC=${_CC} ./config no-asm shared --prefix=${OUTPUT_PATH}/${OPENSSL}
 
@@ -54,7 +54,7 @@ make_ssl () {
 
 ## ssh 要求不能修改 prefix
 do_copy () {
-    cd ${BASE}/source/${OPENSSH}
+    cd ${CODE_PATH}/${OPENSSH}
     mkdir ${OUTPUT_PATH}/${OPENSSH}/bin -p
     mkdir ${OUTPUT_PATH}/${OPENSSH}/sbin -p
     mkdir ${OUTPUT_PATH}/${OPENSSH}/etc -p
@@ -71,10 +71,14 @@ do_copy () {
     #sftp-server  ssh-keysign 拷贝到目标板 /usr/local/libexec
     #sshd 拷贝到目标板 /usr/local/sbin/
     echo "Copy all dirs under $FIN_INSTALL" > ${OUTPUT_PATH}/${OPENSSH}/install_path
+    # 拷贝其他脚本、配置
+    mkdir -p ${OUTPUT_PATH}/others
+    rm ${OUTPUT_PATH}/others/* -rf
+    cp ${BASE}/meta/*  ${OUTPUT_PATH}//others
 }
 
 make_key () {
-    cd ${BASE}/source/${OPENSSH}
+    cd ${CODE_PATH}/${OPENSSH}
     ssh-keygen -t rsa       -f  ssh_host_key -N         ""
     ssh-keygen -t rsa       -f  ssh_host_rsa_key -N     ""
     ssh-keygen -t dsa       -f  ssh_host_dsa_key -N     ""
@@ -92,7 +96,7 @@ make_ssh () {
     rm -v -rf ${OUTPUT_PATH}/${OPENSSL}/lib/*.so*
 
     bash <<EOF
-    cd ${BASE}/source/${OPENSSH}
+    cd ${CODE_PATH}/${OPENSSH}
     ./configure \
     --host=${BUILD_HOST} \
     --build=i386 \
@@ -124,6 +128,7 @@ cp -rfv  ${ZLIB}/lib/*.so*     ${FIN_INSTALL}/lib/
 
 cp /etc/passwd  /etc/passwd_bak
 echo "sshd:x:74:74:Privilege-separated SSH:/var/empty/sshd:/sbin/nologin" >> /etc/passwd
+
 EOF
 ) > ${OUTPUT_PATH}/install_helper
     chmod +x ${OUTPUT_PATH}/install_helper
