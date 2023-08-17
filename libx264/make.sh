@@ -2,4 +2,4 @@
 
 source ../.common
 
-make_bash || echo "Err"
+make_x264

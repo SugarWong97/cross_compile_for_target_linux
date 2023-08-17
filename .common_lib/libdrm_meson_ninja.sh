@@ -1,24 +1,13 @@
-##
-#    Copyright By Schips, All Rights Reserved
-#    https://gitee.com/schips/
-
-#    File Name:  make.sh
-#    2022年5月12日 16:58:31
-##
-#!/bin/bash
-
 # 新版的libdrm开始采用meson + ninja 的方式编译了。
-
-source ../.common
 export LIBDRM=libdrm-2.4.110
-LIBDRM_DIR=${OUTPUT_PATH}/libdrm
+export LIBDRM_DIR=${OUTPUT_PATH}/libdrm
 
-download_libdrm () {
+download_libdrm_meson_ninja () {
     #https://dri.freedesktop.org/libdrm/
     tget https://dri.freedesktop.org/libdrm/${LIBDRM}.tar.xz
 }
 
-function make_libdrm () {
+function mk_libdrm_meson_ninja () {
 (
     cat <<EOF
 [binaries]
@@ -77,13 +66,10 @@ EOF
 
 function build_libdrm ()
 {
-    download_libdrm || return 1
+    require ninja
+    require meson
+    download_libdrm_meson_ninja || return 1
     tar_package || return 1
-    make_libdrm || return 1
+    mk_libdrm_meson_ninja || return 1
 }
-require ninja
-require meson
-build_libdrm || echo "Err"
 
-echo "=========================="
-echo "Gen files in ${LIBDRM_DIR}"

@@ -1,12 +1,3 @@
-##
-#    Copyright By Schips, All Rights Reserved
-#    https://gitee.com/schips/
-#    File Name:  make.sh
-##
-#!/bin/sh
-
-source ../.common
-
 
 LIBYUV_INSTALL=${OUTPUT_PATH}/libyuv
 
@@ -16,7 +7,7 @@ download_libyuv () {
     tgit  https://github.com/lemenkov/libyuv
 }
 
-make_libyuv () {
+mk_libyuv () {
     cd ${CODE_PATH}/libyuv* || return 1
 
     local LIBYUV_DIR=`pwd`
@@ -33,11 +24,10 @@ make_libyuv () {
 }
 
 
-mk_libyuv ()
+make_libyuv ()
 {
     make_dirs
-    download_libyuv|| { echo >&2 "download_libyuv "; exit 1; }
+    download_libyuv || { echo >&2 "download_libyuv "; exit 1; }
     tar_package
-    make_libyuv
+    mk_libyuv
 }
-mk_libyuv

@@ -5,6 +5,11 @@ export tmp_config=my_config
 ## make 参数
 MKTHD="-j 30"
 
+
+# 编译架构
+export BUILD_ARCH=arm64
+#export BUILD_ARCH=arm
+
 #export BUILD_HOST=arm-linux
 export BUILD_HOST=arm-linux-gnueabi
 ## 必要时，填写你的工具链的所在路径
@@ -113,11 +118,13 @@ EOF
 function tar_package () {
 bash <<EOF
     cd ${ARCHIVE_PATH}
-    for TAR in \`find . -maxdepth 1 -mindepth 1 -type f\`
+    for TAR in \`find . -maxdepth 1 -mindepth 1\`
     do
+        if [ -d  \$TAR ]; then
+            continue
+        fi
         tarfile=\`basename \$TAR\`
         filename=\`echo \${tarfile}| sed 's/.tar.gz//'| sed 's/.tgz//'| sed 's/.tar.bz2//'\`
-        #if [ ! -d "${CODE_PATH}/\`basename \$TAR\`" ]; then
         if [ ! -d "${CODE_PATH}/\${filename}" ]; then
             echo "Untar \$tarfile..."
             tar -xf \$TAR -C  ${CODE_PATH}
@@ -144,6 +151,25 @@ sed -r -i "/$oldt/ s/.*/$newt/1" -i $fin
 EOF
 
 }
+function mk_softlink_to_dest()
+{
+    local src="$1"
+    local dst="$2"
+
+    if [ ! -f $src ]; then
+        echo "Need a file."
+        return 1
+    fi
+
+    local full_path_src=`readlink -f $src`
+    local full_path_dst=`readlink -f $dst`
+    if [ "$full_path_dst" =  "$full_path_src" ]; then
+        echo "Skip, same path."
+    else
+        unlink $dst > /dev/null 2>&1
+        ln -s $full_path_src $dst  2>&1
+    fi
+}
 
 function require () {
     echo "Checking [$1]"
@@ -158,87 +184,32 @@ require ${_LD}     || return 1
 require ${_RANLIB} || return 1
 require ${_STRIP}  || return 1
 
+# 如果需要看到 过程，则 在使用时随便提供一个参数
+#export SHVERBOSE=$1
+#export SHVERBOSE=1
 
-## 常见的移植
-export ZLIB=zlib-1.2.11
-export OPENSSL=openssl-1.0.2t
+# getArg0
+if [ -z "${BASH_SOURCE[0]}" ]; then
+#as zsh
+A0=$0
+else
+#as bash
+A0=${BASH_SOURCE[0]}
+fi
+export ROOT_DIR=`dirname $A0`
+export THIS_SH=`basename $A0`
+export COMMON_SH_DIR=$ROOT_DIR/.common_lib
 
-export LIBCAP_VERSION=2.67  # 03-Feb-2023 05:20
-
-### ZLIB
-function get_zlib () {
-    tget https://www.zlib.net/${ZLIB}.tar.gz
-}
-
-function make_zlib () {
-bash <<EOF
-    cd ${CODE_PATH}/${ZLIB}
-    CC=${_CC} ./configure --prefix=${OUTPUT_PATH}/${ZLIB}
-    make clean
-    make $MKTHD && make install
-EOF
-}
-
-### OPENSSL
-function get_ssl () {
-    tget  https://www.openssl.org/source/${OPENSSL}.tar.gz
-}
-
-# 删除不需要的Makefile的doc规则
-# 这部分规则容易引起Makefile死循环
-function pre_make_ssl () {
-    bash <<EOF
-    cd ${BASE}/source/${OPENSSL}
-    startLine=\`sed -n '/install_html_docs\:/=' Makefile\`
-    echo \$startLine
-    for startline in \$startLine # 避免多行结果
+# 初始各组件的编译脚本
+load_shells () {
+    for sh_file in `cd $COMMON_SH_DIR; find . -type f -name "*.sh" | grep -v "$THIS_SH" | grep -v ".todo/" | grep -v ".ref/" | sed 's/..//'`
     do
-        endLine=\`expr \$startline + 999\`
-        sed -i \$startline','\$endLine'd' Makefile
-        echo "install_html_docs:" >> Makefile
-        echo -e "\t@echo skip by Schips" >> Makefile
-        echo "install_docs:" >> Makefile
-        echo -e "\t@echo skip by Schips" >> Makefile
-        echo "# DO NOT DELETE THIS LINE -- make depend depends on it." >> Makefile
-        break
+        source $COMMON_SH_DIR/$sh_file
+
+        if [ ! -z "$SHVERBOSE" ]; then
+            echo "Source $sh_file"
+        fi
+
     done
-EOF
 }
-function make_ssl () {
-    pre_make_ssl || return 1
-    bash <<EOF
-
-    cd ${BASE}/source/${OPENSSL}
-    echo "SSL ABOUT"
-    CC=${_CC} ./config no-asm shared --prefix=${OUTPUT_PATH}/${OPENSSL}
-
-    sed 's/-m64//g'  -i Makefile # 删除-m64 关键字 (arm-gcc 不支持)
-    #sudo mv /usr/bin/pod2man /usr/bin/pod2man_bak
-    #mv doc/apps /tmp/
-    make $MKTHD && make install
-EOF
-}
-
-#### LIBCAP
-export LIBCAP=libcap
-export LIBCAP_OUTPUT=${OUTPUT_PATH}/${LIBCAP}
-
-function download_libcap () {
-    # https://mirrors.edge.kernel.org/pub/linux/libs/security/linux-privs/libcap2/
-    tget   https://mirrors.edge.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-${LIBCAP_VERSION}.tar.gz
-}
-
-function mk_libcap () {
-    libcap_dir=${CODE_PATH}/libcap*${1}*
-    cd $libcap_dir;
-    make clean -C $libcap_dir
-    CROSS_COMPILE=aarch64-none-linux-gnu- BUILD_CC=gcc make prefix=${LIBCAP_OUTPUT} install  -C $libcap_dir
-}
-
-function make_libcap ()
-{
-    download_libcap  || return 1
-    tar_package || return 1
-
-    mk_libcap $LIBCAP_VERSION
-}
+load_shells

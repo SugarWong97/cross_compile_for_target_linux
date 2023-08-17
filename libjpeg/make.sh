@@ -1,14 +1,14 @@
-#!/bin/bash
 ##
 #    Copyright By Schips, All Rights Reserved
 #    https://gitee.com/schips/
 
 #    File Name:  make.sh
-#    Created  :  2023-08-16 16:44:20 PM CST
+#    Created  :  Fri 22 Nov 2019 11:49:30 AM CST
 
 ##
+#!/bin/sh
 
 source ../.common
 
 
-make_libmodbus
+make_libjpeg || echo "Err"
