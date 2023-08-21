@@ -3,7 +3,7 @@ export X264_VERSION=${X264}-snapshot-20171212-2245
 
 ## for others
 X264_FILE_NAME=${X264_VERSION}.tar.bz2
-X264_ARCH_PATH=$ROOT_DIR/x264/compressed/${X264_FILE_NAME}
+X264_ARCH_PATH=$ROOT_DIR/libx264/compressed/${X264_FILE_NAME}
 
 # 下列有些编译选项可能会影响到编译是否正常，需要结合gcc做确认
 export DISABLE_X264_ASM=yes
@@ -23,13 +23,6 @@ function get_x264 () {
     fi
 }
 
-function mk_x264() {
-    if [ "$DISABLE_X264_ASM" = "yes" ]; then
-        X264_CONFIG_STR_ASM="--disable-asm"
-    fi
-    if [ "$DISABLE_X264_OPENCL" = "yes" ]; then
-        X264_CONFIG_STR_OPENCL="--disable-opencl"
-    fi
 function _x264_gen_make_sh () {
 cat<<EOF
     CC=${_CC} \
@@ -41,6 +34,14 @@ cat<<EOF
     --cross-prefix=${BUILD_HOST_}
 EOF
 }
+
+function mk_x264() {
+    if [ "$DISABLE_X264_ASM" = "yes" ]; then
+        X264_CONFIG_STR_ASM="--disable-asm"
+    fi
+    if [ "$DISABLE_X264_OPENCL" = "yes" ]; then
+        X264_CONFIG_STR_OPENCL="--disable-opencl"
+    fi
     cd ${BASE}/source/${X264_VERSION}
 
     _x264_gen_make_sh > $tmp_config
