@@ -118,16 +118,21 @@ EOF
 function tar_package () {
 bash <<EOF
     cd ${ARCHIVE_PATH}
-    for TAR in \`find . -maxdepth 1 -mindepth 1\`
+    for FILE_CPS in \`find . -maxdepth 1 -mindepth 1 | grep -E 'tar.gz|tgz|tar.xz|txz|tar.bz2|zip'\`
     do
-        if [ -d  \$TAR ]; then
+        if [ -d  \$FILE_CPS ]; then
             continue
         fi
-        tarfile=\`basename \$TAR\`
-        filename=\`echo \${tarfile}| sed 's/.tar.gz//'| sed 's/.tgz//'| sed 's/.tar.bz2//'\`
+        tarfile=\`basename \$FILE_CPS\`
+        filename=\`echo \${tarfile}| sed 's/.tar.gz//'| sed 's/.tgz//' | sed 's/.tar.xz//' | sed 's/.txz//' | sed 's/.tar.bz2//'| sed 's/.zip// '\`
         if [ ! -d "${CODE_PATH}/\${filename}" ]; then
-            echo "Untar \$tarfile..."
-            tar -xf \$TAR -C  ${CODE_PATH}
+            echo "Uncompressing \$tarfile..."
+            file_type=\`echo \${FILE_CPS##*.}\`
+            if [ "\$file_type" = "zip" ] ; then
+                unzip \$FILE_CPS -d  ${CODE_PATH}
+            else
+                tar -xf \$FILE_CPS -C  ${CODE_PATH}
+            fi
         else
             echo "Skip \$tarfile..."
         fi
