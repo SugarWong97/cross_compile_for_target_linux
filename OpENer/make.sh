@@ -73,7 +73,7 @@ EOF
 
     cd build
     cmake -DCMAKE_C_COMPILER=${BUILD_HOST_}gcc -DOpENer_PLATFORM:STRING="POSIX" -DCMAKE_BUILD_TYPE:STRING="" -DBUILD_SHARED_LIBS:BOOL=OFF ../source
-    make
+    make $MKTHD
 EOF
 ) >   build.sh
     chmod +x build.sh
