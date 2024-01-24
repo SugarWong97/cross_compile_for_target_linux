@@ -10,42 +10,8 @@ download_ssh () {
     tget  http://mirrors.mit.edu/pub/OpenBSD/OpenSSH/portable/${OPENSSH}.tar.gz
 }
 
-# 删除不需要的Makefile的doc规则
-# 这部分规则容易引起Makefile死循环
-pre_make_ssl () {
-    cd ${CODE_PATH}/${OPENSSL}
-    startLine=`sed -n '/install_html_docs\:/=' Makefile`
-    echo $startLine
-    for startline in $startLine # 避免多行结果
-    do
-        endLine=`expr $startline + 999`
-        sed -i $startline','$endLine'd' Makefile
-        echo "install_html_docs:" >> Makefile
-        echo -e "\t@echo skip by Schips" >> Makefile
-        echo "install_docs:" >> Makefile
-        echo -e "\t@echo skip by Schips" >> Makefile
-        echo "# DO NOT DELETE THIS LINE -- make depend depends on it." >> Makefile
-        break
-    done
-}
-
-# 编译安装 ssl
-make_ssl () {
-    cd ${CODE_PATH}/${OPENSSL}
-    echo "SSL ABOUT"
-    pwd
-    CC=${_CC} ./config no-asm shared --prefix=${OUTPUT_PATH}/${OPENSSL}
-
-    sed 's/-m64//g'  -i Makefile # 删除-m64 关键字 (arm-gcc 不支持)
-    #sudo mv /usr/bin/pod2man /usr/bin/pod2man_bak
-    #mv doc/apps /tmp/
-    pre_make_ssl
-    make $MKTHD && make install
-}
-
-
 ## ssh 要求不能修改 prefix
-do_copy_for_openssn () {
+do_copy_for_openssh () {
     cd ${CODE_PATH}/${OPENSSH}
     mkdir ${OUTPUT_PATH}/${OPENSSH}/bin -p
     mkdir ${OUTPUT_PATH}/${OPENSSH}/sbin -p
@@ -130,7 +96,7 @@ make_ssh ()
 {
     download_ssh
     tar_package
-    #make_zlib || { echo >&2 "make_zlib "; exit 1; }
+    make_zlib || { echo >&2 "make_zlib "; exit 1; }
     make_ssl  || { echo >&2 "make_ssl "; exit 1; }
     mk_ssh  || { echo >&2 "mk_ssh "; exit 1; }
     do_copy_for_openssh   || { echo >&2 "do_copy_for_openssn "; exit 1; }
