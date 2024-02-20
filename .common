@@ -2,6 +2,9 @@
 ## configure 参数生成的路径（用于调试）
 export tmp_config=my_config
 
+# 是否自动创建有关的目录(默认创建)
+export SKIP_MK_DIR
+
 ## make 参数
 MKTHD="-j 30"
 
@@ -181,7 +184,9 @@ function require () {
     command -v $1 >/dev/null 2>&1 || { echo >&2 "Aborted : Require \"$1\" but not found."; exit 1; }
 }
 
-make_dirs
+if [ -z $SKIP_MK_DIR ];then
+    make_dirs
+fi
 require ${_CC}     || return 1
 require ${_CPP}    || return 1
 require ${_AR}     || return 1
