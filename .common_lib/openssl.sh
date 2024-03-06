@@ -1,9 +1,18 @@
 export OPENSSL=openssl-1.0.2t
 
+## for others
+OPENSSL_FILE_NAME=${OPENSSL}.tar.gz
+OPENSSL_ARCH_PATH=$ROOT_DIR/openssl/compressed/${OPENSSL_FILE_NAME}
+
 ### OPENSSL
 function get_ssl () {
-    # TODO
-    tget  https://www.openssl.org/source/${OPENSSL}.tar.gz
+    if [ -f "$OPENSSL_ARCH_PATH" ]; then
+        mkdir -p $ARCHIVE_PATH
+        mk_softlink_to_dest $OPENSSL_ARCH_PATH $ARCHIVE_PATH/$OPENSSL_FILE_NAME
+        return
+    else
+        tget  https://www.openssl.org/source/${OPENSSL}.tar.gz
+    fi
 }
 
 # 删除不需要的Makefile的doc规则
@@ -26,7 +35,7 @@ function pre_make_ssl () {
     done
 EOF
 }
-function make_ssl () {
+function mk_ssl () {
     pre_make_ssl || return 1
     bash <<EOF
 
@@ -39,5 +48,11 @@ function make_ssl () {
     #mv doc/apps /tmp/
     make $MKTHD && make install
 EOF
+}
+
+function make_ssl () {
+    get_ssl
+    tar_package       || return 1
+    mk_ssl || return 1
 }
 
