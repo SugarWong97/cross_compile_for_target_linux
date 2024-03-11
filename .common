@@ -143,7 +143,7 @@ bash <<EOF
 EOF
 }
 
-# 将含有关键字的行替换为新的内容
+# 将含有关键字的行整行替换为新的内容
 function file_replace_match_lines(){
     local fin=$1
     local old=$2
@@ -152,13 +152,48 @@ function file_replace_match_lines(){
         echo "$0 file old new"
         return 1
     fi
+    # 找出匹配的行
+    ## cut : -d 用来设置间隔符为冒号， -f 提取所需要的域
+    local find_line=`cat $fin | grep -n "$old" |  cut -f1 -d:`
+    if [ $? != 0 ];then
+        return $?
+    fi
+    # 考虑到替换的文本可能需要转义，尝试使用不需要转义的符号
+    for token in `echo '#' '/'  '!' '@' '|'`
+    do
+        ret=`echo "$old $new" | grep "$token"`
+        if [ ! -z "$ret" ];then
+            continue
+        fi
+        #echo "safe $token"
+        # 依次替换匹配的所有行
+        for line in `echo $find_line`
+        do
+            #sed "${line}s/.*/$new/g" $fin
+        bash <<EOF
+        sed -i '${line}s$token.*$token$new${token}g' $fin
+EOF
+        done
+
+        # 替换成功则退出
+        if [ $? = 0 ];then
+            return
+        fi
+    done
+    #(找不到安全的分隔符)
+
+    # 基于'/'的转义下做的替换
     local oldt=`echo $old| sed 's:\/:\\\/:g'`
     local newt=`echo $new| sed 's:\/:\\\/:g'`
-    bash <<EOF
-sed -r -i "/$oldt/ s/.*/$newt/1" -i $fin
-EOF
 
+    for line in `echo $find_line`
+    do
+        bash <<EOF
+        sed -i "${line}s/.*/$newt/g" $fin
+EOF
+    done
 }
+
 function mk_softlink_to_dest()
 {
     local src="$1"
