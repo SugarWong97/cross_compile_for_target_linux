@@ -1,21 +1,21 @@
 # 老版本的libdrm，采用configure , make 的方式
 
-export LIBDRM=libdrm-2.4.89
-LIBDRM_DIR=${OUTPUT_PATH}/libdrm
+export LIBDRM_LEAGCY=libdrm-2.4.89
+LIBDRM_LEAGCY_DIR=${OUTPUT_PATH}/libdrm
 
 download_libdrm_leagcy () {
     #https://dri.freedesktop.org/libdrm/
-    tget https://dri.freedesktop.org/libdrm/${LIBDRM}.tar.bz2
+    tget https://dri.freedesktop.org/libdrm/${LIBDRM_LEAGCY}.tar.bz2
 }
 
 function mk_libdrm_leagcy () {
 bash <<EOF
 
-    cd ${CODE_PATH}/${LIBDRM}
+    cd ${CODE_PATH}/${LIBDRM_LEAGCY}
 
      ./configure \
     --host=${BUILD_HOST} \
-    --prefix=${LIBDRM_DIR} \
+    --prefix=${LIBDRM_LEAGCY_DIR} \
     --disable-nouveau \
     --enable-static \
     --enable-install-test-programs

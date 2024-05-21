@@ -1,10 +1,10 @@
 # 新版的libdrm开始采用meson + ninja 的方式编译了。
-export LIBDRM=libdrm-2.4.110
-export LIBDRM_DIR=${OUTPUT_PATH}/libdrm
+export LIBDRM_NINJA=libdrm-2.4.110
+export LIBDRM_NINJA_DIR=${OUTPUT_PATH}/libdrm
 
 download_libdrm_meson_ninja () {
     #https://dri.freedesktop.org/libdrm/
-    tget https://dri.freedesktop.org/libdrm/${LIBDRM}.tar.xz
+    tget https://dri.freedesktop.org/libdrm/${LIBDRM_NINJA}.tar.xz
 }
 
 function mk_libdrm_meson_ninja () {
@@ -30,7 +30,7 @@ endian = 'little'
 EOF
 ) > ${CODE_PATH}/cross_file.txt
 bash <<EOF
-    cd ${CODE_PATH}/${LIBDRM}
+    cd ${CODE_PATH}/${LIBDRM_NINJA}
     #创建编译目录
     mkdir build
 
@@ -39,7 +39,7 @@ bash <<EOF
     #meson配置
     #-D 选定需要编译的模块
     # 选项的值可以是true、auto或者false
-    meson --prefix=${LIBDRM_DIR} \
+    meson --prefix=${LIBDRM_NINJA_DIR} \
           --cross-file=${CODE_PATH}/cross_file.txt \
           -D amdgpu=false \
           -D cairo-tests=false \
