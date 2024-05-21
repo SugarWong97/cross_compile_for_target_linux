@@ -13,6 +13,7 @@ function download_libcap () {
 function mk_libcap () {
     libcap_dir=${CODE_PATH}/libcap*${1}*
     cd $libcap_dir;
+    export GOLANG=no # 让libcap不通过go来编译，采取常规编译比较快
     make clean -C $libcap_dir
     CROSS_COMPILE=aarch64-none-linux-gnu- BUILD_CC=gcc make prefix=${LIBCAP_OUTPUT} install  -C $libcap_dir
 }
