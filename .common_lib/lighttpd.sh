@@ -1,6 +1,6 @@
 
 # 最终的运行环境
-FIN_INSTALL=/usr/local/lighttpd
+FIN_INSTALL_LIGHTTPD=/usr/local/lighttpd
 
 download_lighttpd () {
     cd ${BASE}/compressed
@@ -17,7 +17,7 @@ cat<<EOF
     --without-pcre \
     --without-openssl \
     --host=${BUILD_HOST} \
-    --prefix=${FIN_INSTALL}
+    --prefix=${FIN_INSTALL_LIGHTTPD}
 EOF
 }
     cd ${BASE}/source/*
@@ -34,7 +34,7 @@ mk_lighttpd_install () {
     mkdir ${BASE}/install/sbin -p
     cd ${BASE}/source/*
     SRCTOP=`pwd`
-    echo "${FIN_INSTALL} with ${BUILD_HOST}gcc" > ${BASE}/install/ccinfo
+    echo "${FIN_INSTALL_LIGHTTPD} with ${BUILD_HOST}gcc" > ${BASE}/install/ccinfo
     cp $SRCTOP/src/.libs/*.so       ${OUTPUT_PATH}/lib  -r
     cp $SRCTOP/src/lighttpd-angel   ${OUTPUT_PATH}/sbin
     cp $SRCTOP/src/lighttpd         ${OUTPUT_PATH}/sbin
