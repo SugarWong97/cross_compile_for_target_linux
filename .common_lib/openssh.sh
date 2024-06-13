@@ -1,7 +1,7 @@
 #OPENSSH=openssh-6.6p1
 OPENSSH=openssh-9.1p1
 
-FIN_INSTALL=/usr/local
+FIN_INSTALL_OPENSSH=/usr/local
 
 #下载包
 download_ssh () {
@@ -28,7 +28,7 @@ do_copy_for_openssh () {
     #moduli ssh_config sshd_config拷贝到目标板 /usr/local/etc
     #sftp-server  ssh-keysign 拷贝到目标板 /usr/local/libexec
     #sshd 拷贝到目标板 /usr/local/sbin/
-    echo "Copy all dirs under $FIN_INSTALL" > ${OUTPUT_PATH}/${OPENSSH}/install_path
+    echo "Copy all dirs under $FIN_INSTALL_OPENSSH" > ${OUTPUT_PATH}/${OPENSSH}/install_path
     # 拷贝其他脚本、配置
     mkdir -p ${OUTPUT_PATH}/others
     rm ${OUTPUT_PATH}/others/* -rf
@@ -43,7 +43,7 @@ make_key_openssh () {
     ssh-keygen -t ecdsa     -f  ssh_host_ecdsa_key -N   ""
     ssh-keygen -t ed25519   -f  ssh_host_ed25519_key -N ""
 
-    #将生成的 ssh_host_*_key这4个文件copy到目标板的 $FIN_INSTALL/etc/目录下
+    #将生成的 ssh_host_*_key这4个文件copy到目标板的 $FIN_INSTALL_OPENSSH/etc/目录下
     cp ssh_host*key ${OUTPUT_PATH}/${OPENSSH}/etc
 }
 
@@ -58,7 +58,7 @@ mk_ssh () {
     ./configure \
     --host=${BUILD_HOST} \
     --build=i386 \
-    --prefix=${FIN_INSTALL} \
+    --prefix=${FIN_INSTALL_OPENSSH} \
     --with-libs --with-zlib=${OUTPUT_PATH}/${ZLIB} \
     --with-ssl-dir=${OUTPUT_PATH}/${OPENSSL} \
     --disable-etc-default-login \
@@ -80,9 +80,9 @@ mkdir -vp /usr/local/libexec/
 mkdir -vp /var/run/
 mkdir -vp /var/empty/
 
-cp -rfv  ${OPENSSH}/*          ${FIN_INSTALL}/
-cp -rfv  ${OPENSSL}/lib/*.so*  ${FIN_INSTALL}/lib/
-cp -rfv  ${ZLIB}/lib/*.so*     ${FIN_INSTALL}/lib/
+cp -rfv  ${OPENSSH}/*          ${FIN_INSTALL_OPENSSH}/
+cp -rfv  ${OPENSSL}/lib/*.so*  ${FIN_INSTALL_OPENSSH}/lib/
+cp -rfv  ${ZLIB}/lib/*.so*     ${FIN_INSTALL_OPENSSH}/lib/
 
 cp /etc/passwd  /etc/passwd_bak
 echo "sshd:x:74:74:Privilege-separated SSH:/var/empty/sshd:/sbin/nologin" >> /etc/passwd
