@@ -7,7 +7,7 @@ NGINX_OUTOUT=${OUTPUT_PATH}/$NGINX
 DEBUG_NGINX_CONFIG_CMD=${CODE_PATH}/${NGINX}/"configure.nginx"
 
 set_nginx_info() {
-    FIN_INSTALL=/usr/${NGINX}
+    FIN_INSTALL_NGINX=/usr/${NGINX}
     ccinfo=${NGINX_OUTOUT}/nginx.info
 }
 
@@ -76,7 +76,7 @@ pre_make_nginx () {
 #endif
 EOF
 ) >> ${HEAD_FILE}
-    file_replace_match_lines ${HEAD_FILE} "#define NGX_PREFIX" "#define NGX_PREFIX \"${FIN_INSTALL}/\""
+    file_replace_match_lines ${HEAD_FILE} "#define NGX_PREFIX" "#define NGX_PREFIX \"${FIN_INSTALL_NGINX}/\""
 
 
     DEL_LINE=`sed -n "/modules\:/="  Makefile  | awk 'END {print}'`
@@ -114,13 +114,13 @@ mk_nginx () {
     make install
     (
     cat <<EOF
-${FIN_INSTALL} for ${_CC}
+${FIN_INSTALL_NGINX} for ${_CC}
 -----------------
 
 addgroup nogroup
 adduser nobody
 
-${FIN_INSTALL}/sbin/nginx -c ${FIN_INSTALL}/conf/nginx.conf
+${FIN_INSTALL_NGINX}/sbin/nginx -c ${FIN_INSTALL_NGINX}/conf/nginx.conf
 EOF
     ) > $ccinfo
 }
