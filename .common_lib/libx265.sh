@@ -1,5 +1,6 @@
 export X265=x265_3.2
 export X265_OUTPUT_PATH=${OUTPUT_PATH}/x265
+export X265_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/x265
 
 ## for others
 X265_FILE_NAME=${X265}.tar.gz
@@ -45,8 +46,34 @@ mk_x265() {
     make install
 }
 
+mk_x265_host () {
+    cd ${BASE}/source/x265*/build
+    mkdir host-x265
+    cd host-x265
+    # 获取 工具链所在位置
+    GCC_FULL_PATH=`whereis ${BUILD_HOST_}gcc | awk -F: '{ print $2 }' | awk '{print $1}'` # 防止多个结果
+    CROSS_PATH=`dirname ${GCC_FULL_PATH}`
+    touch crosscompile.cmake
+    echo "set(CMAKE_SHARED_LINKER_FLAGS \"-ldl \${CMAKE_SHARED_LINKER_FLAGS}\")" >> crosscompile.cmake
+
+    # 编译安装
+    cmake -DCMAKE_TOOLCHAIN_FILE=crosscompile.cmake -G "Unix Makefiles" \
+    -DCMAKE_C_FLAGS="-fPIC ${CMAKE_C_FLAGS}" -DCMAKE_CXX_FLAGS="-fPIC ${CMAKE_CXX_FLAGS}" \
+    -DCMAKE_SHARED_LINKER_FLAGS="-ldl ${CMAKE_SHARED_LINKER_FLAGS}"  \
+    -DCMAKE_INSTALL_PREFIX=${X265_OUTPUT_PATH_HOST} ../../source || return 1
+    make -j8
+    make install
+}
+
 function make_x265 () {
     get_x265
     tar_package
     mk_x265
 }
+
+function make_x265_host () {
+    get_x265
+    tar_package
+    mk_x265_host
+}
+
