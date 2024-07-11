@@ -16,6 +16,7 @@ export DISABLE_X264_OPENCL=yes
 fi
 
 X264_OUTPUT_PATH=${OUTPUT_PATH}/x264
+X264_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/x264
 
 ### X264
 function get_x264 () {
@@ -39,6 +40,14 @@ cat<<EOF
     --cross-prefix=${BUILD_HOST_}
 EOF
 }
+function _x264_gen_make_sh_host () {
+cat<<EOF
+    ./configure \
+    --enable-shared \
+    --enable-pic \
+    --prefix=${X264_OUTPUT_PATH_HOST} ${X264_CONFIG_STR_OPENCL} ${X264_CONFIG_STR_ASM}
+EOF
+}
 
 function mk_x264() {
     if [ "$DISABLE_X264_ASM" = "yes" ]; then
@@ -50,6 +59,22 @@ function mk_x264() {
     cd ${BASE}/source/${X264_VERSION}
 
     _x264_gen_make_sh > $tmp_config
+    source ./$tmp_config || return 1
+
+    make clean
+    make $MKTHD && make install
+}
+
+function mk_x264_host () {
+    if [ "$DISABLE_X264_ASM" = "yes" ]; then
+        X264_CONFIG_STR_ASM="--disable-asm"
+    fi
+    if [ "$DISABLE_X264_OPENCL" = "yes" ]; then
+        X264_CONFIG_STR_OPENCL="--disable-opencl"
+    fi
+    cd ${BASE}/source/${X264_VERSION}
+
+    _x264_gen_make_sh_host > $tmp_config
     source ./$tmp_config || return 1
 
     make clean
@@ -68,4 +93,19 @@ DISABLE_X264_ASM :
     在高版本的gcc中，也许DISABLE_X264_ASM设为no更好
     如果不确定，将当前的配置值("$DISABLE_X264_ASM")取反即可(yes, no)
 EOF
+}
+
+function make_x264_host () {
+    get_x264
+    tar_package       || return 1
+    mk_x264_host && return 0
+    cat <<EOF
+编译失败，请检查下列选项
+
+DISABLE_X264_ASM :
+    在低版本的gcc中，也许DISABLE_X264_ASM设为yes更好
+    在高版本的gcc中，也许DISABLE_X264_ASM设为no更好
+    如果不确定，将当前的配置值("$DISABLE_X264_ASM")取反即可(yes, no)
+EOF
+    return 1
 }
