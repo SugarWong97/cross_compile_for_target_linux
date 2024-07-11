@@ -22,11 +22,27 @@ if [ -z $USING_X265_FOR_FFMPEG ];then
 export USING_X265_FOR_FFMPEG=yes
 fi
 
-X264_OUTPUT_PATH=${OUTPUT_PATH}/x264
-X265_OUTPUT_PATH=${OUTPUT_PATH}/x265
-FFMP_OUTPUT_PATH=${OUTPUT_PATH}/ffmpeg
+export X264_OUTPUT_PATH=${OUTPUT_PATH}/x264
+export X265_OUTPUT_PATH=${OUTPUT_PATH}/x265
+export FFMP_OUTPUT_PATH=${OUTPUT_PATH}/ffmpeg
+
+export X264_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/x264
+export X265_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/x265
+export FFMP_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/ffmpeg
+
+set_ffmpeg_path()
+{
+    export X264_OUTPUT_PATH=${OUTPUT_PATH}/x264
+    export X265_OUTPUT_PATH=${OUTPUT_PATH}/x265
+    export FFMP_OUTPUT_PATH=${OUTPUT_PATH}/ffmpeg
+
+    export X264_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/x264
+    export X265_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/x265
+    export FFMP_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/ffmpeg
+}
 
 download_package_for_ffmpeg () {
+    set_ffmpeg_path
     if [ ! -z "$USING_X264_FOR_FFMPEG" ];then
         get_x264
     fi
@@ -60,8 +76,8 @@ function gen_ffmpeg_make_sh () {
         enable_for_x265="--enable-libx265"
     fi
 cat<<EOF
-    MYPKGCONFIG_x264=${BASE}/install/x264/lib/pkgconfig/
-    MYPKGCONFIG_x265=${BASE}/install/x265/lib/pkgconfig/
+    MYPKGCONFIG_x264=${X264_OUTPUT_PATH}/lib/pkgconfig/
+    MYPKGCONFIG_x265=${X265_OUTPUT_PATH}/lib/pkgconfig/
     export PKG_CONFIG_PATH=\${MYPKGCONFIG_x264}:\${MYPKGCONFIG_x265}:\$PKG_CONFIG_PATH
     ./configure \
     --enable-cross-compile \
@@ -89,6 +105,41 @@ cat<<EOF
 EOF
     #--enable-ffserver \
 }
+function gen_ffmpeg_make_sh_host () {
+    local enable_for_x264=""
+    local enable_for_x265=""
+    if [ ! -z "$USING_X264_FOR_FFMPEG" ];then
+        enable_for_x264="--enable-libx264"
+    fi
+    if [ ! -z "$USING_X265_FOR_FFMPEG" ];then
+        enable_for_x265="--enable-libx265"
+    fi
+cat<<EOF
+    MYPKGCONFIG_x264=${X264_OUTPUT_PATH_HOST}/lib/pkgconfig/
+    MYPKGCONFIG_x265=${X265_OUTPUT_PATH_HOST}/lib/pkgconfig/
+    export PKG_CONFIG_PATH=\${MYPKGCONFIG_x264}:\${MYPKGCONFIG_x265}:\$PKG_CONFIG_PATH
+    ./configure \
+    --target-os=linux \
+    --prefix=${FFMP_OUTPUT_PATH_HOST} \
+    --enable-shared \
+    --enable-static \
+    --enable-gpl \
+    --enable-nonfree \
+    --enable-ffmpeg \
+    --disable-ffplay \
+    --enable-swscale \
+    --enable-pthreads \
+    --disable-armv5te \
+    --disable-armv6 \
+    --disable-armv6t2 \
+    --disable-yasm \
+    --disable-stripping ${enable_for_x264} ${enable_for_x265} \
+    --pkg-config="pkg-config --static" \
+    --extra-cflags="-I${X264_OUTPUT_PATH_HOST}/include -I${X265_OUTPUT_PATH_HOST}/include" \
+    --extra-ldflags="-L${X264_OUTPUT_PATH_HOST}/lib -L${X265_OUTPUT_PATH_HOST}/lib "
+EOF
+    #--enable-ffserver \
+}
 
 function mk_ffmpeg() {
 
@@ -111,5 +162,28 @@ function make_ffmpeg ()
         make_x265 || return 1
     fi
     mk_ffmpeg
+}
+
+function mk_ffmpeg_host() {
+
+    cd ${CODE_PATH}/${FFMPEG_VERSION}
+    gen_ffmpeg_make_sh_host > $tmp_config
+    bash ./$tmp_config || return 1
+    make clean
+    make $MKTHD && make install
+}
+
+function make_ffmpeg_host ()
+{
+    require cmake || return 1
+    download_package_for_ffmpeg  || return 1
+    tar_package || return 1
+    if [ ! -z "$USING_X264_FOR_FFMPEG" ];then
+        make_x264_host || return 1
+    fi
+    if [ ! -z "$USING_X265_FOR_FFMPEG" ];then
+        make_x265_host || return 1
+    fi
+    mk_ffmpeg_host
 }
 

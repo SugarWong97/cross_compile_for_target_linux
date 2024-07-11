@@ -7,10 +7,12 @@
 
 # LIBX264 Config(启用libx264时有效)
 ## 如果编译libx264时报错，可能和这些有关
-export DISABLE_X264_ASM=n
-export DISABLE_X264_OPENCL=n
 
 
 source ../.common
 
+export DISABLE_X264_ASM=yes
+export DISABLE_X264_OPENCL=n
+
 make_ffmpeg || echo "Err"
+#make_ffmpeg_host || echo "Err"
