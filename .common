@@ -22,6 +22,7 @@ BUILD_HOST_PATH=/opt/gcc-arm-linux-gnueabi/bin
 export BASE=`pwd`
 export CODE_PATH=${BASE}/source/
 export OUTPUT_PATH=${BASE}/install/
+export OUTPUT_PATH_HOST=${BASE}/install.host/
 export ARCHIVE_PATH=${BASE}/compressed
 
 ## 工具链
