@@ -1,18 +1,16 @@
 #!/bin/bash
 
-# 是否启用 Libx264, Libx265
-## 默认启用，禁用时设y即可
-#export DISABLE_X264_FOR_FFMPEG=y
-#export DISABLE_X265_FOR_FFMPEG=y
-
-# LIBX264 Config(启用libx264时有效)
-## 如果编译libx264时报错，可能和这些有关
-
+# 通过y/n来配置ffmpeg是否启用 Libx264, Libx265（默认启用）
+#export USING_X264_FOR_FFMPEG=y
+#export USING_X265_FOR_FFMPEG=y
 
 source ../.common
 
-export DISABLE_X264_ASM=yes
-export DISABLE_X264_OPENCL=n
+# LIBX264 Config(启用libx264时有效)
+### 通过y/n来配置libx264是否启用ASM（默认禁用）
+#export USING_X264_ASM=n
+### 通过y/n来配置libx264是否启用OPENCL（默认禁用）
+#export USING_X264_OPENCL=n
 
 make_ffmpeg || echo "Err"
 #make_ffmpeg_host || echo "Err"

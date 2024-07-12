@@ -4,23 +4,16 @@ export FFMPEG=ffmpeg
 #export FFMPEG_VERSION=${FFMPEG}-4.0.1
 export FFMPEG_VERSION=${FFMPEG}-7.0
 
-# 是否启用 Libx264, Libx265
+# 通过y/n来配置ffmpeg是否启用 Libx264, Libx265
 ## 默认启用，禁用时设y即可
-export DISABLE_X264_FOR_FFMPEG
-export DISABLE_X265_FOR_FFMPEG
+export USING_X264_FOR_FFMPEG
+export USING_X265_FOR_FFMPEG
 
 # LIBX264 Config(启用libx264时有效)
-export DISABLE_X264_ASM=n
-export DISABLE_X264_OPENCL=n
-
-
-if [ -z $DISABLE_X264_FOR_FFMPEG ];then
-export USING_X264_FOR_FFMPEG=yes
-fi
-
-if [ -z $USING_X265_FOR_FFMPEG ];then
-export USING_X265_FOR_FFMPEG=yes
-fi
+### 通过y/n来配置libx264是否启用ASM（默认禁用）
+#export USING_X264_ASM=n
+### 通过y/n来配置libx264是否启用OPENCL（默认禁用）
+#export USING_X264_OPENCL=n
 
 export X264_OUTPUT_PATH=${OUTPUT_PATH}/x264
 export X265_OUTPUT_PATH=${OUTPUT_PATH}/x265
@@ -30,7 +23,7 @@ export X264_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/x264
 export X265_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/x265
 export FFMP_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/ffmpeg
 
-set_ffmpeg_path()
+set_ffmpeg()
 {
     export X264_OUTPUT_PATH=${OUTPUT_PATH}/x264
     export X265_OUTPUT_PATH=${OUTPUT_PATH}/x265
@@ -39,14 +32,25 @@ set_ffmpeg_path()
     export X264_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/x264
     export X265_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/x265
     export FFMP_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/ffmpeg
+    if [ "$USING_X264_FOR_FFMPEG" = "n" ];then
+        export X264_FOR_FFMPEG="no"
+    else
+        export X264_FOR_FFMPEG="yes"
+    fi
+
+    if [ "$USING_X265_FOR_FFMPEG" = "n" ];then
+        export X265_FOR_FFMPEG="no"
+    else
+        export X265_FOR_FFMPEG="yes"
+    fi
 }
 
 download_package_for_ffmpeg () {
-    set_ffmpeg_path
-    if [ ! -z "$USING_X264_FOR_FFMPEG" ];then
+    set_ffmpeg
+    if [ "$X264_FOR_FFMPEG" = "yes" ];then
         get_x264
     fi
-    if [ ! -z "$USING_X265_FOR_FFMPEG" ];then
+    if [ "$X265_FOR_FFMPEG" = "yes" ];then
         get_x265
     fi
     tget https://ffmpeg.org//releases/${FFMPEG_VERSION}.tar.bz2
@@ -69,10 +73,10 @@ download_package_for_ffmpeg () {
 function gen_ffmpeg_make_sh () {
     local enable_for_x264=""
     local enable_for_x265=""
-    if [ ! -z "$USING_X264_FOR_FFMPEG" ];then
+    if [ "$X264_FOR_FFMPEG" = "yes" ];then
         enable_for_x264="--enable-libx264"
     fi
-    if [ ! -z "$USING_X265_FOR_FFMPEG" ];then
+    if [ "$X265_FOR_FFMPEG" = "yes" ];then
         enable_for_x265="--enable-libx265"
     fi
 cat<<EOF
@@ -108,10 +112,10 @@ EOF
 function gen_ffmpeg_make_sh_host () {
     local enable_for_x264=""
     local enable_for_x265=""
-    if [ ! -z "$USING_X264_FOR_FFMPEG" ];then
+    if [ "$X264_FOR_FFMPEG" = "yes" ];then
         enable_for_x264="--enable-libx264"
     fi
-    if [ ! -z "$USING_X265_FOR_FFMPEG" ];then
+    if [ "$X265_FOR_FFMPEG" = "yes" ];then
         enable_for_x265="--enable-libx265"
     fi
 cat<<EOF
@@ -155,10 +159,10 @@ function make_ffmpeg ()
     require cmake || return 1
     download_package_for_ffmpeg  || return 1
     tar_package || return 1
-    if [ ! -z "$USING_X264_FOR_FFMPEG" ];then
+    if [ "$X264_FOR_FFMPEG" = "yes" ];then
         make_x264 || return 1
     fi
-    if [ ! -z "$USING_X265_FOR_FFMPEG" ];then
+    if [ "$X265_FOR_FFMPEG" = "yes" ];then
         make_x265 || return 1
     fi
     mk_ffmpeg
@@ -178,10 +182,10 @@ function make_ffmpeg_host ()
     require cmake || return 1
     download_package_for_ffmpeg  || return 1
     tar_package || return 1
-    if [ ! -z "$USING_X264_FOR_FFMPEG" ];then
+    if [ "$X264_FOR_FFMPEG" = "yes" ];then
         make_x264_host || return 1
     fi
-    if [ ! -z "$USING_X265_FOR_FFMPEG" ];then
+    if [ "$X265_FOR_FFMPEG" = "yes" ];then
         make_x265_host || return 1
     fi
     mk_ffmpeg_host
