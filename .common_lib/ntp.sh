@@ -1,5 +1,7 @@
 
-NTP=ntp-4.2.8p17
+export NTP=ntp
+export CONFIG_NTP_VERSION=4.2.8p17
+export NTP_VERSION=${NTP}-${CONFIG_NTP_VERSION}
 
 NTP_OUTPUT=${OUTPUT_PATH}/${NTP}
 
@@ -7,7 +9,13 @@ NTP_OUTPUT=${OUTPUT_PATH}/${NTP}
 download_ntp () {
     get_ssl
     #echo "https://downloads.nwtime.org/ntp/"
-    tget  https://downloads.nwtime.org/ntp/${NTP}.tar.gz
+
+    # 4.2.8p17 -> 4.2.8
+    # e.g :
+    ##  https://downloads.nwtime.org/ntp/4.2.8/ntp-4.2.8p17.tar.gz
+    config_ntp_version_for_url=`echo $CONFIG_NTP_VERSION| cut -f 1 -d "p" `
+
+    tget  https://downloads.nwtime.org/ntp/${config_ntp_version_for_url}/${NTP_VERSION}.tar.gz
 }
 
 
@@ -18,7 +26,7 @@ mk_ntp () {
     clear
 (
     cat <<EOF
-    cd ${CODE_PATH}/ntp*
+    cd ${CODE_PATH}/*${NTP_VERSION}*
     export LD=${_LD}
     export CC=${_CC}
     # 自行替换 openssl 的路径
