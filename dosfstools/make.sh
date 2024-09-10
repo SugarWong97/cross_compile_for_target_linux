@@ -2,4 +2,6 @@
 
 source ../.common
 
-make_dosfstools || echo "Err"
+#DOSFSTOOLS_OUTPUT_PATH=${OUTPUT_PATH}/dosfstools
+
+make_dosfstools
