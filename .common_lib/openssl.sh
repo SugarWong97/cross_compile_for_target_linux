@@ -1,7 +1,10 @@
-export OPENSSL=openssl-1.0.2t
+export OPENSSL=openssl
+export CONFIG_OPENSSL=1.0.2t
+export OPENSSL_VERSION=openssl-$CONFIG_OPENSSL
+export OPENSSL_OUTPUT_PATH=${OUTPUT_PATH}/${OPENSSL}
 
 ## for others
-OPENSSL_FILE_NAME=${OPENSSL}.tar.gz
+OPENSSL_FILE_NAME=${OPENSSL_VERSION}.tar.gz
 OPENSSL_ARCH_PATH=$ROOT_DIR/openssl/compressed/${OPENSSL_FILE_NAME}
 
 ### OPENSSL
@@ -11,7 +14,7 @@ function get_ssl () {
         mk_softlink_to_dest $OPENSSL_ARCH_PATH $ARCHIVE_PATH/$OPENSSL_FILE_NAME
         return
     else
-        tget  https://www.openssl.org/source/${OPENSSL}.tar.gz
+        tget  https://www.openssl.org/source/${OPENSSL_VERSION}.tar.gz
     fi
 }
 
@@ -19,7 +22,7 @@ function get_ssl () {
 # 这部分规则容易引起Makefile死循环
 function pre_make_ssl () {
     bash <<EOF
-    cd ${BASE}/source/${OPENSSL}
+    cd ${CODE_PATH}/${OPENSSL_VERSION}
     startLine=\`sed -n '/install_html_docs\:/=' Makefile\`
     echo \$startLine
     for startline in \$startLine # 避免多行结果
@@ -39,9 +42,8 @@ function mk_ssl () {
     pre_make_ssl || return 1
     bash <<EOF
 
-    cd ${BASE}/source/${OPENSSL}
-    echo "SSL ABOUT"
-    CC=${_CC} ./config no-asm shared --prefix=${OUTPUT_PATH}/${OPENSSL}
+    cd ${CODE_PATH}/${OPENSSL_VERSION}
+    CC=${_CC} ./config no-asm shared --prefix=${OPENSSL_OUTPUT_PATH}
 
     sed 's/-m64//g'  -i Makefile # 删除-m64 关键字 (arm-gcc 不支持)
     #sudo mv /usr/bin/pod2man /usr/bin/pod2man_bak
