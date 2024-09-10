@@ -1,21 +1,22 @@
 
 DROPBEAR=dropbear
-DROPBEAR_VERSION=2022.82
-DROPBEAR_INSTALL=${OUTPUT_PATH}/${DROPBEAR}
+export CONFIG_DROPBEAR_VERSION=2024.85
+export DROPBEAR_VERSION=${DROPBEAR}-${CONFIG_DROPBEAR_VERSION}
+export DROPBEAR_OUTPUT_PATH=${OUTPUT_PATH}/${DROPBEAR}
 
 #下载包
 download_dropbear () {
     get_zlib
-    tget  https://matt.ucc.asn.au/dropbear/dropbear-${DROPBEAR_VERSION}.tar.bz2
+    tget  https://matt.ucc.asn.au/dropbear/dropbear-${CONFIG_DROPBEAR_VERSION}.tar.bz2
 }
 
 mk_dropbear () {
-    cd ${CODE_PATH}/${DROPBEAR}*
+    cd ${CODE_PATH}/${DROPBEAR_VERSION}
 
     ./configure \
     --host=arm \
-    --prefix=${DROPBEAR_INSTALL} \
-    --with-zlib=${OUTPUT_PATH}/${ZLIB} \
+    --prefix=${DROPBEAR_OUTPUT_PATH} \
+    --with-zlib=${ZLIB_OUTPUT_PATH} \
     --enable-static \
     CC=${_CC} \
     AR=${_AR}
@@ -28,19 +29,19 @@ mk_dropbear () {
 echo_dropbear_help() {
 cat <<EOF
 -----------------------------------
-in target:
+#in target:
 
-    mkdir -p /usr/sbin/
-    mkdir -p /etc/dropbear/
+mkdir -p /usr/sbin/
+mkdir -p /etc/dropbear/
 
-    cd <dropbear-path>
-    cp bin/* sbin/* /usr/bin
+cd <dropbear-path>
+cp bin/* sbin/* /usr/bin
 
-    cd /etc/dropbear
-    dropbearkey -t rsa -f dropbear_rsa_host_key
-    dropbearkey -t dss -f dropbear_dss_host_key
+cd /etc/dropbear
+dropbearkey -t rsa -f dropbear_rsa_host_key
+dropbearkey -t dss -f dropbear_dss_host_key
 
-    /usr/sbin/dropbear -p 22
+/usr/sbin/dropbear -p 22
 EOF
 }
 
@@ -51,4 +52,5 @@ make_dropbear ()
     make_zlib || { echo >&2 "make_zlib "; exit 1; }
     mk_dropbear  || { echo >&2 "make_ssh "; exit 1; }
     echo_dropbear_help
+    echo_dropbear_help > $DROPBEAR_OUTPUT_PATH/init.sh
 }
