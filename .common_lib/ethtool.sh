@@ -1,21 +1,20 @@
 ETHTOOL=ethtool
-ETHTOOL_VERSION=6.0
-ETHTOOL_INSTALL=${OUTPUT_PATH}/ethtool
+CONFIG_ETHTOOL_VERSION=6.0
+export ETHTOOL_OUTPUT_PATH=${OUTPUT_PATH}/ethtool
 
 download_ethtool () {
     #get_libmnl TODO : 等到libmnl被更多的库使用后，再为其搞一个单独的目录
     download_libmnl
-    tget https://mirrors.edge.kernel.org/pub/software/network/ethtool/ethtool-${ETHTOOL_VERSION}.tar.xz
-    #tget https://github.com/thkukuk/libnsl/releases/download/v${LIBNSL}/libnsl-${LIBNSL}.tar.xz
+    tget https://mirrors.edge.kernel.org/pub/software/network/ethtool/ethtool-${CONFIG_ETHTOOL_VERSION}.tar.xz
 }
 
 mk_ethtool () {
 
-    cd $CODE_PATH/ethtool-${ETHTOOL_VERSION}
+    cd $CODE_PATH/ethtool-${CONFIG_ETHTOOL_VERSION}
 
     ./configure  --host=arm-linux CC=${_CC} \
         MNL_CFLAGS="-I${LIBMNL_INSTALL}/include" MNL_LIBS="-L${LIBMNL_INSTALL}/lib -lmnl" \
-        --prefix=${ETHTOOL_INSTALL} \
+        --prefix=${ETHTOOL_OUTPUT_PATH} \
         LDFLAGS=-static
 
     make CC=${_CC} prefix=${LRZSZ_INSTALL}  LIBS="" || return -1
