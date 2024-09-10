@@ -63,7 +63,7 @@ gen_ntp_client_usage()
 (
     cat<<EOF
 # 修改时区(可选)
-#export TZ="UTC-08:00"
+export TZ="UTC-08:00"
 
 # 同步时间服务器的时间
 killall ntpdate > /dev/null 2>&1 && sleep 1
