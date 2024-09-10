@@ -1,5 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 
 source ../.common
 
-make_curl || echo "Err"
+#export CONFIG_CURL_VERSION=7.69.1
+#export CURL_OUTPUT_PATH=${OUTPUT_PATH}/${CURL}
+
+make_curl
