@@ -7,7 +7,7 @@ export DROPBEAR_OUTPUT_PATH=${OUTPUT_PATH}/${DROPBEAR}
 #下载包
 download_dropbear () {
     get_zlib
-    tget  https://matt.ucc.asn.au/dropbear/dropbear-${CONFIG_DROPBEAR_VERSION}.tar.bz2
+    tget  https://matt.ucc.asn.au/dropbear/releases/dropbear-${CONFIG_DROPBEAR_VERSION}.tar.bz2
 }
 
 mk_dropbear () {
