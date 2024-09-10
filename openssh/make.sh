@@ -1,3 +1,8 @@
 source ../.common
 
+#export FIN_INSTALL_OPENSSH=/usr/local
+#export OPENSSH_OUTPUT_PATH=${OUTPUT_PATH}/${OPENSSH}
+export OPENSSL_OUTPUT_PATH=${OUTPUT_PATH}/${OPENSSH}
+export ZLIB_OUTPUT_PATH=${OUTPUT_PATH}/${OPENSSH}
+
 make_ssh
