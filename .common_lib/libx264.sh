@@ -10,11 +10,33 @@ export USING_X264_ASM
 ### 通过y/n来配置libx264是否启用OPENCL（默认禁用）
 export USING_X264_OPENCL
 
-X264_OUTPUT_PATH=${OUTPUT_PATH}/x264
-X264_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/x264
+export X264_OUTPUT_PATH=${OUTPUT_PATH}/x264
+export X264_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/x264
 
 ### X264
 function get_x264 () {
+    if [ -f "$X264_ARCH_PATH" ]; then
+        mkdir -p $ARCHIVE_PATH
+        mk_softlink_to_dest $X264_ARCH_PATH $ARCHIVE_PATH/$X264_FILE_NAME
+        return
+    else
+        tget http://download.videolan.org/pub/videolan/x264/snapshots/${X264_FILE_NAME}
+    fi
+}
+
+function _x264_gen_make_sh () {
+    local for_host="$1"
+    local config_args_add=""
+    if [ -z "$for_host" ];then
+        read -r -d '' config_args_add <<- EOF
+    CC=${_CC} \
+    --prefix=${X264_OUTPUT_PATH} \
+    --host=${BUILD_HOST} \
+    --cross-prefix=${BUILD_HOST_}
+EOF
+    else
+        config_args_add="--prefix=${X264_OUTPUT_PATH_HOST} "
+    fi
     if [ "$USING_X264_ASM" = "y" ];then
         export X264_ASM_DIS="no"
     else
@@ -27,42 +49,26 @@ function get_x264 () {
         export X264_OPENCL_DIS="no"
     fi
 
-    if [ -f "$X264_ARCH_PATH" ]; then
-        mkdir -p $ARCHIVE_PATH
-        mk_softlink_to_dest $X264_ARCH_PATH $ARCHIVE_PATH/$X264_FILE_NAME
-        return
-    else
-        tget http://download.videolan.org/pub/videolan/x264/snapshots/${X264_FILE_NAME}
-    fi
-}
 
-function _x264_gen_make_sh () {
-cat<<EOF
-    CC=${_CC} \
-    ./configure \
-    --host=${BUILD_HOST} \
-    --enable-shared \
-    --enable-pic \
-    --prefix=${X264_OUTPUT_PATH} ${X264_CONFIG_STR_OPENCL} ${X264_CONFIG_STR_ASM} \
-    --cross-prefix=${BUILD_HOST_}
-EOF
-}
-function _x264_gen_make_sh_host () {
-cat<<EOF
-    ./configure \
-    --enable-shared \
-    --enable-pic \
-    --prefix=${X264_OUTPUT_PATH_HOST} ${X264_CONFIG_STR_OPENCL} ${X264_CONFIG_STR_ASM}
-EOF
-}
-
-function mk_x264() {
     if [ "$X264_ASM_DIS" = "yes" ]; then
         X264_CONFIG_STR_ASM="--disable-asm"
     fi
     if [ "$X264_OPENCL_DIS" = "yes" ]; then
         X264_CONFIG_STR_OPENCL="--disable-opencl"
     fi
+cat<<EOF
+    ./configure \
+    --enable-shared \
+    --enable-pic  ${config_args_add} \
+     ${X264_CONFIG_STR_OPENCL} ${X264_CONFIG_STR_ASM}
+
+EOF
+}
+function _x264_gen_make_sh_host () {
+    _x264_gen_make_sh y
+}
+
+function mk_x264() {
     cd ${BASE}/source/${X264_VERSION}
 
     _x264_gen_make_sh > $tmp_config
@@ -73,12 +79,6 @@ function mk_x264() {
 }
 
 function mk_x264_host () {
-    if [ "$X264_ASM_DIS" = "yes" ]; then
-        X264_CONFIG_STR_ASM="--disable-asm"
-    fi
-    if [ "$X264_OPENCL_DIS" = "yes" ]; then
-        X264_CONFIG_STR_OPENCL="--disable-opencl"
-    fi
     cd ${BASE}/source/${X264_VERSION}
 
     _x264_gen_make_sh_host > $tmp_config
@@ -96,7 +96,7 @@ function print_x264_fail_info ()
 USING_X264_ASM :
     在低版本的gcc中，也许USING_X264_ASM设为y更好
     在高版本的gcc中，也许USING_X264_ASM设为n更好
-    如果不确定，将当前的配置值("$USING_X264_ASM")取反即可(y, n)
+    如果不确定，将当前的配置值("${USING_X264_ASM}")取反即可(y, n)
 EOF
 }
 
