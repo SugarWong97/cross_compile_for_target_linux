@@ -1,14 +1,10 @@
-#
-#    Copyright By Schips, All Rights Reserved
-#    https://gitee.com/schips/
-#
-#    File Name:  make.sh
-#    Created  :  2020-10-17 09:38:39
-#
-#
-#!/bin/sh
+#!/bin/bash
 
 source ../.common
 
+#export CANUTILS_OUTPUT_PATH=${OUTPUT_PATH}/canutils
 
-make_canutils || echo "Err"
+#export LIBSOCKETCAN_OUTPUT_PATH=${OUTPUT_PATH}/libsocketcan
+export LIBSOCKETCAN_OUTPUT_PATH=${OUTPUT_PATH}/canutils
+
+make_canutils
