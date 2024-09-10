@@ -1,20 +1,20 @@
 
-export _BASH_VERSION=4.3
-BASH_OUTPUT=${OUTPUT_PATH}/bash
+export BASH=bash
+export CONFIG_BASH_VERSION=4.3
+export BASH_VERSION=${BASH}-${CONFIG_BASH_VERSION}
+export BASH_OUTPUT_PATH=${OUTPUT_PATH}/bash
 
 function download_bash () {
     #tget    https://ftp.gnu.org/gnu/bash/bash-5.1.8.tar.gz
-    tget    https://ftp.gnu.org/gnu/bash/bash-${_BASH_VERSION}.tar.gz
+    tget    https://ftp.gnu.org/gnu/bash/bash-${CONFIG_BASH_VERSION}.tar.gz
 }
-
 
 function mk_bash () {
     bash <<EOF
 
-    cd ${BASE}/source
-    cd \`ls ${BASE}/source | tail -n 1\`
+    cd ${CODE_PATH}/$BASH_VERSION
 
-    ./configure CC=${_CC} --prefix=${BASH_OUTPUT} \
+    ./configure CC=${_CC} --prefix=${BASH_OUTPUT_PATH} \
         --host=arm-linux \
         --target=${BUILD_HOST} \
         --enable-history \
@@ -43,6 +43,7 @@ EOF
 
 function make_bash ()
 {
+    export BASH_VERSION=${BASH}-${CONFIG_BASH_VERSION}
     download_bash  || return 1
     tar_package || return 1
 
