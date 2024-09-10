@@ -1,9 +1,10 @@
 
-E2FSPROGS_VERSION=1.45.6
-E2FSPROGS_OUTPUT_PATH=${OUTPUT_PATH}/e2fsprogs
+CONFIG_E2FSPROGS_VERSION=1.45.6
+E2FSPROGS_VERSION=e2fsprogs-$CONFIG_E2FSPROGS_VERSION
+export E2FSPROGS_OUTPUT_PATH=${OUTPUT_PATH}/e2fsprogs
 
 download_e2fsprogs () {
-    tget https://udomain.dl.sourceforge.net/project/e2fsprogs/e2fsprogs/v${E2FSPROGS_VERSION}/e2fsprogs-${E2FSPROGS_VERSION}.tar.gz
+    tget https://udomain.dl.sourceforge.net/project/e2fsprogs/e2fsprogs/v${CONFIG_E2FSPROGS_VERSION}/e2fsprogs-${CONFIG_E2FSPROGS_VERSION}.tar.gz
 }
 
 function mk_e2fsprogs () {
@@ -18,7 +19,7 @@ cat<<EOF
 EOF
 }
 
-    cd ${BASE}/source/e2fsprogs*
+    cd ${CODE_PATH}/${E2FSPROGS_VERSION}
 
     mkdir configure_dir -p
     cd configure_dir
@@ -36,4 +37,3 @@ function make_e2fsprogs ()
     tar_package  || return 1
     mk_e2fsprogs  || return 1
 }
-
