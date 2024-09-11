@@ -1,11 +1,14 @@
-export LIBFFI=libffi
+LIBFFI=libffi
 export CONFIG_LIBFFI_VERSION=3.4.5
-LIBFFI_FILE_NAME=${LIBFFI}-${CONFIG_LIBFFI_VERSION}.tar.bz2
-LIBFFI_ARCH_PATH=$ROOT_DIR/${LIBFFI}/compressed/${LIBFFI_FILE_NAME}
-LIBFFI_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/libffi.sh
+export LIBFFI_OUTPUT_PATH=${OUTPUT_PATH}/${LIBFFI}
+
+export LIBFFI_FILE_NAME=${LIBFFI}-${CONFIG_LIBFFI_VERSION}.tar.bz2
+export LIBFFI_ARCH_PATH=$ROOT_DIR/${LIBFFI}/compressed/${LIBFFI_FILE_NAME}
 
 get_libffi()
 {
+    export LIBFFI_FILE_NAME=${LIBFFI}-${CONFIG_LIBFFI_VERSION}.tar.bz2
+    export LIBFFI_ARCH_PATH=$ROOT_DIR/${LIBFFI}/compressed/${LIBFFI_FILE_NAME}
     if [ -f "$LIBFFI_ARCH_PATH" ]; then
         mkdir -p $ARCHIVE_PATH
         mk_softlink_to_dest $LIBFFI_ARCH_PATH $ARCHIVE_PATH/$LIBFFI_FILE_NAME
@@ -18,7 +21,7 @@ get_libffi()
 function mk_libffi () {
 bash <<EOF
     cd ${CODE_PATH}/${LIBFFI}*
-    CC=${_CC} ./configure --prefix=${OUTPUT_PATH}/${LIBFFI} --host=${BUILD_HOST}
+    CC=${_CC} ./configure --prefix=${LIBFFI_OUTPUT_PATH} --host=${BUILD_HOST}
     make clean
     make $MKTHD && make install
 EOF
@@ -26,6 +29,7 @@ EOF
 
 make_libffi()
 {
+    export LIBFFI_FILE_NAME=${LIBFFI}-${CONFIG_LIBFFI_VERSION}.tar.bz2
     get_libffi
     tar_package
     mk_libffi

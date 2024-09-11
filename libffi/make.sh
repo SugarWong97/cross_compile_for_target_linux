@@ -1,6 +1,8 @@
 #!/bin/bash
-
 source ../.common
 
+#export CONFIG_LIBFFI_VERSION=3.4.5
 
-make_libffi || echo "Error when make libffi"
+#export LIBFFI_OUTPUT_PATH=${OUTPUT_PATH}/${LIBFFI}
+
+make_libffi
