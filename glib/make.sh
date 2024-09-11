@@ -1,6 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 
 source ../.common
 
+#export GLIB_OUTPUT_PATH=${OUTPUT_PATH}/${GLIB}
 
-make_glib || echo "Err"
+#export ZLIB_OUTPUT_PATH=${OUTPUT_PATH}/${ZLIB}
+export ZLIB_OUTPUT_PATH=${OUTPUT_PATH}/${GLIB}
+
+#export LIBFFI_OUTPUT_PATH=${OUTPUT_PATH}/${LIBFFI}
+export LIBFFI_OUTPUT_PATH=${OUTPUT_PATH}/${GLIB}
+
+make_glib

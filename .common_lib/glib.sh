@@ -2,7 +2,7 @@ export GLIB=glib
 #export CONFIG_GLIB_VERSION=2.80.5
 export CONFIG_GLIB_VERSION=2.56.4
 export GLIB_VERSION=${GLIB}-${CONFIG_GLIB_VERSION}
-
+export GLIB_OUTPUT_PATH=${OUTPUT_PATH}/${GLIB}
 
 ## for others
 GLIB_FILE_NAME=${GLIB}.tar.gz
@@ -31,12 +31,12 @@ function mk_glib () {
 bash <<EOF
     cd ${CODE_PATH}/${GLIB_VERSION}
 
-    LIBFFI_CFLAGS='-I${OUTPUT_PATH}/${LIBFFI}/include' \
-    LIBFFI_LIBS='-lffi -L=${OUTPUT_PATH}/${LIBFFI}/lib -L=${OUTPUT_PATH}/${LIBFFI}/lib64' \
-    ZLIB_CFLAGS='-I${OUTPUT_PATH}/${ZLIB}/include' \
-    ZLIB_LIBS='-lz -L${OUTPUT_PATH}/${ZLIB}/lib' \
-    ./configure --host=${BUILD_HOST} --prefix=${OUTPUT_PATH}/${GLIB} \
-    PKG_CONFIG_PATH=${OUTPUT_PATH}/${LIBFFI}/lib/pkgconfig:${OUTPUT_PATH}/${ZLIB}/lib/pkgconfig \
+    LIBFFI_CFLAGS='-I${LIBFFI_OUTPUT_PATH}/include' \
+    LIBFFI_LIBS='-lffi -L=${LIBFFI_OUTPUT_PATH}/lib -L=${LIBFFI_OUTPUT_PATH}/lib64' \
+    ZLIB_CFLAGS='-I${ZLIB_OUTPUT_PATH}/include' \
+    ZLIB_LIBS='-lz -L${ZLIB_OUTPUT_PATH}/lib' \
+    ./configure --host=${BUILD_HOST} --prefix=${GLIB_OUTPUT_PATH} \
+    PKG_CONFIG_PATH=${LIBFFI_OUTPUT_PATH}/lib/pkgconfig:${ZLIB_OUTPUT_PATH}/lib/pkgconfig \
     glib_cv_stack_grows=no glib_cv_uscore=yes \
     ac_cv_func_posix_getpwuid_r=yes ac_cv_func_posix_getgrgid_r=yes \
     --with-pcre=internal --enable-libmount=no
@@ -47,6 +47,7 @@ EOF
 }
 
 function make_glib () {
+    export GLIB_VERSION=${GLIB}-${CONFIG_GLIB_VERSION}
     get_glib
     tar_package       || return 1
     mk_glib
