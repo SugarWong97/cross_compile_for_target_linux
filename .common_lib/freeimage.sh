@@ -1,12 +1,12 @@
 
-FREEIMAGE_VERSION=3180
+export CONFIG_FREEIMAGE_VERSION=3180
 export FREEIMAGE=freeimage
-FREEIMAGE_OUTPUT=${OUTPUT_PATH}/${FREEIMAGE}
+export FREEIMAGE_OUTPUT=${OUTPUT_PATH}/${FREEIMAGE}
 
 
 function download_freeimage () {
     #https://freeimage.sourceforge.io/download.html
-    tget_and_rename  http://downloads.sourceforge.net/freeimage/FreeImage${FREEIMAGE_VERSION}.zip FreeImage.zip
+    tget_and_rename  http://downloads.sourceforge.net/freeimage/FreeImage${CONFIG_FREEIMAGE_VERSION}.zip FreeImage.zip
     #tgit   https://github.com/WinMerge/freeimage.git
 }
 
