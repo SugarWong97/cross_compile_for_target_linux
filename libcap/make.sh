@@ -1,15 +1,8 @@
-#!/bin/bash
-##
-#    Copyright By Schips, All Rights Reserved
-#    https://gitee.com/schips/
-
-#    File Name:  make.sh
-#    Created  :  2023-08-17 15:09:10 PM CST
-
-##
-
 source ../.common
 
+#export LIBCAP_VERSION=2.67  # 03-Feb-2023 05:20
+
+#export LIBCAP_OUTPUT_PATH=${OUTPUT_PATH}/${LIBCAP}
 
 
 make_libcap
