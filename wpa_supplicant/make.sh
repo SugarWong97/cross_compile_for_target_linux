@@ -2,4 +2,10 @@
 
 source ../.common
 
-make_wpa_supplicant || echo "Err"
+#export WPA_SUPPLICANT_OUTPUT_PATH=${OUTPUT_PATH}/${WPA_SUPPLICANT}
+
+#export OPENSSL_OUTPUT_PATH=${OUTPUT_PATH}/${OPENSSL}
+export OPENSSL_OUTPUT_PATH=${OUTPUT_PATH}/${WPA_SUPPLICANT}
+
+
+make_wpa_supplicant
