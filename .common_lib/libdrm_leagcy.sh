@@ -18,7 +18,8 @@ bash <<EOF
     --prefix=${LIBDRM_LEAGCY_DIR} \
     --disable-nouveau \
     --enable-static \
-    --enable-install-test-programs
+    --enable-install-test-programs \
+    --disable-cairo-tests
     #--with-plugindir=/usr/local/lib/alsa_lib
 
     make  $MKTHD
