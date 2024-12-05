@@ -1,22 +1,33 @@
 #!/bin/sh
+
+# getArg0
+if [ -z "${BASH_SOURCE[0]}" ]; then
+#as zsh
+A0=$0
+else
+#as bash
+A0=${BASH_SOURCE[0]}
+fi
+export ROOT_DIR=`dirname $A0`
+export THIS_SH=`basename $A0`
+export COMMON_SH_DIR=$ROOT_DIR/.common_lib
+
+export BUILD_ARCH
+export BUILD_HOST
+export BUILD_HOST_PATH
+source $ROOT_DIR/custom.env
+if [ -z $BUILD_ARCH ];then
+export BUILD_ARCH=arm64
+fi
+if [ -z $BUILD_HOST ];then
+export BUILD_HOST=arm-linux-gnueabi
+fi
+
 ## configure 参数生成的路径（用于调试）
 export tmp_config=my_config
 
 # 是否自动创建有关的目录(默认创建)
 export SKIP_MK_DIR
-
-## make 参数
-MKTHD="-j 30"
-
-
-# 编译架构
-export BUILD_ARCH=arm64
-#export BUILD_ARCH=arm
-
-#export BUILD_HOST=arm-linux
-export BUILD_HOST=arm-linux-gnueabi
-## 必要时，填写你的工具链的所在路径
-BUILD_HOST_PATH=/opt/gcc-arm-linux-gnueabi/bin
 
 ## 路径管理
 export BASE=`pwd`
@@ -233,18 +244,6 @@ require ${_STRIP}  || return 1
 # 如果需要看到 过程，则 在使用时随便提供一个参数
 #export SHVERBOSE=$1
 #export SHVERBOSE=1
-
-# getArg0
-if [ -z "${BASH_SOURCE[0]}" ]; then
-#as zsh
-A0=$0
-else
-#as bash
-A0=${BASH_SOURCE[0]}
-fi
-export ROOT_DIR=`dirname $A0`
-export THIS_SH=`basename $A0`
-export COMMON_SH_DIR=$ROOT_DIR/.common_lib
 
 # 初始各组件的编译脚本
 load_shells () {
