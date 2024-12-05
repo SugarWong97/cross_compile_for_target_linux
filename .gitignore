@@ -8,6 +8,7 @@
 *.elf
 */source/
 */install/
+*/compressed/.mark
 # Linker output
 *.ilk
 *.map
