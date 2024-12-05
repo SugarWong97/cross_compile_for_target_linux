@@ -82,15 +82,13 @@ function make_dirs () {
 
 function tget () { #try wget
     local filename=`basename $1`
-bash <<EOF
     cd ${ARCHIVE_PATH}
     echo "Downloading [${filename}]..."
     if [ ! -f ${filename} ];then
-        wget "$@"
+        wget "$@" || { echo "Failed"; rm $filename;exit 0; };
     fi
 
     echo "[OK] Downloaded [${filename}] "
-EOF
 }
 
 # 适用于 例如github等情况 https://github.com/<author>/<repo>/archive/refs/tags/va.b.c.tar.gz
@@ -102,22 +100,18 @@ function tget_and_rename () { #try wget
     if [ ! -z "$output" ]; then
         filename="$output"
     fi
-    echo $all
-bash <<EOF
     cd ${ARCHIVE_PATH}
     echo "Downloading [${filename}]..."
     if [ ! -f ${filename} ];then
-        wget $1 -O $filename
+        wget $1 -O $filename || { echo "Failed"; rm $filename;exit 0; };
     fi
 
     echo "[OK] Downloaded [${filename}] "
-EOF
 }
 
 function tgit () { #try git and tar
     local filename=`basename $1 | sed 's/.git//g'`
 
-bash <<EOF
     cd ${ARCHIVE_PATH}
     echo "Clone [${filename}]..."
     if [ ! -f ${filename}.tgz ];then
@@ -129,7 +123,6 @@ bash <<EOF
     fi
 
     echo "[OK] Cloned [${filename}] "
-EOF
 }
 
 function tar_package () {
