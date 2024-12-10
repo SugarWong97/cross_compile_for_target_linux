@@ -8,8 +8,8 @@ download_iproute2 () {
 
 mk_iproute2 () {
 
-    cp -v ${BASE}/meta/${IP_ROUTE2}/Makefile $CODE_PATH/${IP_ROUTE2}
-    cp -v ${BASE}/meta/${IP_ROUTE2}/config.mk $CODE_PATH/${IP_ROUTE2}
+    cp -v ${META_PATH}/${IP_ROUTE2}/Makefile $CODE_PATH/${IP_ROUTE2}
+    cp -v ${META_PATH}/${IP_ROUTE2}/config.mk $CODE_PATH/${IP_ROUTE2}
 
     file_replace_match_lines $CODE_PATH/${IP_ROUTE2}/config.mk "my_custom_ar" "AR:=${_AR}"
     file_replace_match_lines $CODE_PATH/${IP_ROUTE2}/config.mk "my_custom_cc" "CC:=${_CC}"
