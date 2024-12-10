@@ -59,7 +59,38 @@ mk_open62541()
     cp -v open62541.c open62541.h $tmp_open62541_output_path
     cp bin/libopen62541.* $tmp_open62541_output_path/lib
 EOF
+}
 
+gen_open62541_cs_demo()
+{
+    local build_for="$1" # host or target
+
+    if [ "$build_for" = "host" ];then
+        tmp_open62541_output_path=$OPEN62541_OUTPUT_PATH_HOST
+        tmp_using_gcc=gcc
+    else
+        tmp_open62541_output_path=$OPEN62541_OUTPUT_PATH
+        tmp_using_gcc=${_CC}
+    fi
+    tmp_output_for_client=client
+    tmp_output_for_server=server
+    build_demo_scrpt=$tmp_open62541_output_path/build_demo.sh
+    cp -v $META_PATH/open62541/*.c $tmp_open62541_output_path
+    cat <<EOF > $build_demo_scrpt
+echo "Build client"
+$tmp_using_gcc client*.c open62541.c -Llib -lopen62541 -o $tmp_output_for_client
+
+echo "Build server"
+$tmp_using_gcc server.c open62541.c -Llib -lopen62541 -o $tmp_output_for_server
+echo "Run server"
+./$tmp_output_for_server &
+echo "Runing Server"
+
+sleep 2
+echo "Run client"
+./$tmp_output_for_client
+EOF
+    chmod +x $build_demo_scrpt
 }
 
 make_open62541()
@@ -67,12 +98,13 @@ make_open62541()
     set_open62541
     download_open62541_package
     tar_package
-
     if [ "$OPEN62541_FOR_HOST" = "yes" ];then
         mk_open62541 host
+        gen_open62541_cs_demo host
     fi
     if [ "$OPEN62541_FOR_TARGET" = "yes" ];then
         mk_open62541 target
+        gen_open62541_cs_demo target
     fi
 }
 
