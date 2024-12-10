@@ -12,7 +12,7 @@ mk_libyuv () {
 
     local LIBYUV_DIR=`pwd`
 
-    cp ${BASE}/meta/Makefile ${LIBYUV_DIR}
+    cp ${META_PATH}/Makefile ${LIBYUV_DIR}
     make CROSS_COMPILE=${BUILD_HOST_} TYPE=so
     make CROSS_COMPILE=${BUILD_HOST_} TYPE=a
     mkdir ${LIBYUV_INSTALL} -p
