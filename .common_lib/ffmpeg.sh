@@ -4,8 +4,7 @@ export FFMPEG=ffmpeg
 #export FFMPEG_VERSION=${FFMPEG}-4.0.1
 export FFMPEG_VERSION=${FFMPEG}-7.0
 
-# 通过y/n来配置ffmpeg是否启用 Libx264, Libx265
-## 默认启用，禁用时设y即可
+# 通过y/n来配置ffmpeg是否启用 Libx264, Libx265（默认启用）
 export USING_X264_FOR_FFMPEG
 export USING_X265_FOR_FFMPEG
 
