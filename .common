@@ -15,6 +15,7 @@ export COMMON_SH_DIR=$ROOT_DIR/.common_lib
 export BUILD_ARCH
 export BUILD_HOST
 export BUILD_HOST_PATH
+export BUILD_HOST_FULL_PATH
 source $ROOT_DIR/custom.env
 if [ -z $BUILD_ARCH ];then
 export BUILD_ARCH=arm64
@@ -232,6 +233,26 @@ function mk_softlink_to_dest()
     fi
 }
 
+get_target_gcc_path ()
+{
+    local ret=""
+
+    ret=`which ${_CC} | grep -v 'not found'`
+    if [ ! -z $ret ];then
+        export BUILD_HOST_FULL_PATH="$ret"
+        export BUILD_HOST_PATH=`dirname $BUILD_HOST_FULL_PATH`
+        return 0
+    fi
+
+    ret=`whereis ${_CC} | awk  '{print$2}' `
+    if [ ! -z $ret ];then
+        export BUILD_HOST_FULL_PATH="$ret"
+        export BUILD_HOST_PATH=`dirname $BUILD_HOST_FULL_PATH`
+        return 0
+    fi
+}
+
+
 function require () {
     echo "Checking [$1]"
     command -v $1 >/dev/null 2>&1 || { echo >&2 "Aborted : Require \"$1\" but not found."; exit 1; }
@@ -246,6 +267,8 @@ require ${_AR}     || return 1
 require ${_LD}     || return 1
 require ${_RANLIB} || return 1
 require ${_STRIP}  || return 1
+
+get_target_gcc_path
 
 # 如果需要看到 过程，则 在使用时随便提供一个参数
 #export SHVERBOSE=$1
