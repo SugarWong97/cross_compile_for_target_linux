@@ -38,7 +38,7 @@ do_copy_for_openssh () {
     # 拷贝其他脚本、配置
     mkdir -p ${OUTPUT_PATH}/others
     rm ${OUTPUT_PATH}/others/* -rf
-    cp ${BASE}/meta/*  ${OUTPUT_PATH}//others
+    cp ${META_PATH}/*  ${OUTPUT_PATH}/others
 }
 
 make_key_openssh () {
