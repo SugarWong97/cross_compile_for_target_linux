@@ -38,6 +38,7 @@ export CODE_PATH=${BASE}/source/
 export OUTPUT_PATH=${BASE}/install/
 export OUTPUT_PATH_HOST=${BASE}/install.host/
 export ARCHIVE_PATH=${BASE}/compressed
+export META_PATH=${BASE}/meta
 
 ## 工具链
 export BUILD_HOST_=""
