@@ -93,7 +93,7 @@ EOF
     chmod +x $install_file
 
     rm -rf $CRON_OUTPUT_PATH/meta
-    cp -rv $BASE/meta $CRON_OUTPUT_PATH/meta
+    cp -rv $META_PATH $CRON_OUTPUT_PATH/meta
 }
 
 function make_cron ()
