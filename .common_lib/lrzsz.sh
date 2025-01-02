@@ -1,6 +1,7 @@
 
 LRZSZ_VERSION=0.12.20
 LRZSZ_INSTALL=${OUTPUT_PATH}/lrzsz
+LRZSZ_INSTALL_HOST=${OUTPUT_PATH_HOST}/lrzsz
 
 #LIBNSL=2.0.0
 #LIBNSL_INSTALL=${OUTPUT_PATH}/libnsl
@@ -35,12 +36,33 @@ mk_lrzsz () {
     make install
 }
 
-function make_lrzsz ()
+mk_lrzsz_host () {
+
+    cd $CODE_PATH/lrzsz-${LRZSZ_VERSION}
+
+    ./configure --prefix=${LRZSZ_INSTALL_HOST} --disable-nls LIBS=""
+
+    make prefix=${LRZSZ_INSTALL_HOST}  LIBS="" || return -1
+
+    make install
+}
+
+function _common_make_lrzsz ()
 {
     download_lrzsz  || return 1
     tar_package || return 1
-
-    #mk_nsl || return 1
-    mk_lrzsz  || return 1
 }
 
+
+function make_lrzsz ()
+{
+    _common_make_lrzsz || return 1
+    mk_lrzsz  || return 1
+    mk_lrzsz
+}
+
+function make_lrzsz_host ()
+{
+    _common_make_lrzsz || return 1
+    mk_lrzsz_host
+}
