@@ -32,6 +32,9 @@ export tmp_config=my_config
 # 是否自动创建有关的目录(默认创建)
 export SKIP_MK_DIR
 
+# 是否检查交叉编译的工具链(默认检查)
+export SKIP_CHECK_TARGET_GCC
+
 ## 路径管理
 export BASE=`pwd`
 export CODE_PATH=${BASE}/source/
@@ -259,15 +262,18 @@ function require () {
     command -v $1 >/dev/null 2>&1 || { echo >&2 "Aborted : Require \"$1\" but not found."; exit 1; }
 }
 
-if [ -z $SKIP_MK_DIR ];then
+if [ -z "$SKIP_MK_DIR" ];then
     make_dirs
 fi
-require ${_CC}     || return 1
-require ${_CPP}    || return 1
-require ${_AR}     || return 1
-require ${_LD}     || return 1
-require ${_RANLIB} || return 1
-require ${_STRIP}  || return 1
+if [ "$SKIP_CHECK_TARGET_GCC" != "y" ]; then
+    echo "If you want to skip [BUILD_HOST] check, using 'export SKIP_CHECK_TARGET_GCC=y'"
+    require ${_CC}     || return 1
+    require ${_CPP}    || return 1
+    require ${_AR}     || return 1
+    require ${_LD}     || return 1
+    require ${_RANLIB} || return 1
+    require ${_STRIP}  || return 1
+fi
 
 get_target_gcc_path
 
