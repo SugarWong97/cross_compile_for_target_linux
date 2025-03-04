@@ -5,20 +5,30 @@ LIBSOCKETCAN=libsocketcan-0.0.12
 export CANUTILS_OUTPUT_PATH=${OUTPUT_PATH}/canutils
 export LIBSOCKETCAN_OUTPUT_PATH=${OUTPUT_PATH}/libsocketcan
 
+LIBSOCKETCAN_trim_file="$ARCHIVE_PATH/$LIBSOCKETCAN.trim.tgz"
+
 download_canutils () {
     #下载包
     #https://git.pengutronix.de/cgit/tools/canutils
     tget https://public.pengutronix.de/software/socket-can/canutils/v4.0/${CANUTILS}.tar.bz2
-
-    #https://git.pengutronix.de/cgit/tools/libsocketcan
-    #tget https://git.pengutronix.de/cgit/tools/libsocketcan/snapshot/${LIBSOCKETCAN}.tar.xz
-    echo "Using trim code"
+    if [ -f "$LIBSOCKETCAN_trim_file" ]; then
+        echo "Using trim code when LIBSOCKETCAN"
+        add_download_mark $LIBSOCKETCAN.trim.tgz
+    else
+        echo "Using offical code when LIBSOCKETCAN"
+        #https://git.pengutronix.de/cgit/tools/libsocketcan
+        tget https://git.pengutronix.de/cgit/tools/libsocketcan/snapshot/${LIBSOCKETCAN}.tar.xz
+    fi
 }
 
 make_libsocketcan() {
     #mkdir -p ${LIBSOCKETCAN_OUTPUT_PATH}
 
-    cd ${CODE_PATH}/${LIBSOCKETCAN}.trim
+    if [ -f "$LIBSOCKETCAN_trim_file" ]; then
+        cd ${CODE_PATH}/${LIBSOCKETCAN}.trim
+    else
+        cd ${CODE_PATH}/${LIBSOCKETCAN}
+    fi
 
     make -f Makefile clean
     make -f Makefile CROSS_COMPILE=${BUILD_HOST_} INSTALL_PATH=$LIBSOCKETCAN_OUTPUT_PATH/
