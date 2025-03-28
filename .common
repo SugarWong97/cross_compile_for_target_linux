@@ -235,6 +235,8 @@ function mk_softlink_to_dest()
         unlink $dst > /dev/null 2>&1
         ln -s $full_path_src $dst  2>&1
     fi
+    local filename=`basename $dst`
+    add_download_mark  $filename
 }
 
 get_target_gcc_path ()
