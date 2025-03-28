@@ -1,10 +1,12 @@
 LIBICONV=libiconv-1.15
 
 ## for others
-LIBICONV_FILE_NAME=${LIBICONV}.tar.gz
-LIBICONV_ARCH_PATH=$ROOT_DIR/libiconv/compressed/${LIBICONV_FILE_NAME}
+export LIBICONV_FILE_NAME=${LIBICONV}.tar.gz
+export LIBICONV_ARCH_PATH=$ROOT_DIR/libiconv/compressed/${LIBICONV_FILE_NAME}
 
 get_libiconv () {
+    export LIBICONV_FILE_NAME=${LIBICONV}.tar.gz
+    export LIBICONV_ARCH_PATH=$ROOT_DIR/libiconv/compressed/${LIBICONV_FILE_NAME}
     if [ -f "$LIBICONV_ARCH_PATH" ]; then
         mkdir -p $ARCHIVE_PATH
         #cp -v $ROOT_DIR/zlib/compressed/${LIBICONV}.tar.gz $ARCHIVE_PATH
@@ -25,6 +27,8 @@ mk_iconv () {
 }
 
 make_iconv () {
+    export LIBICONV_FILE_NAME=${LIBICONV}.tar.gz
+    export LIBICONV_ARCH_PATH=$ROOT_DIR/libiconv/compressed/${LIBICONV_FILE_NAME}
     get_libiconv
     tar_package
     mk_iconv

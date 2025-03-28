@@ -1,11 +1,13 @@
 export PCIUTILS=pciutils-3.12.0
 
 ## for others
-PCIUTILS_FILE_NAME=${PCIUTILS}.tar.gz
-PCIUTILS_ARCH_PATH=$ROOT_DIR/pciutils/compressed/${PCIUTILS_FILE_NAME}
+export PCIUTILS_FILE_NAME=${PCIUTILS}.tar.gz
+export PCIUTILS_ARCH_PATH=$ROOT_DIR/pciutils/compressed/${PCIUTILS_FILE_NAME}
 
 ### PCIUTILS
 function get_pciutils () {
+    export PCIUTILS_FILE_NAME=${PCIUTILS}.tar.gz
+    export PCIUTILS_ARCH_PATH=$ROOT_DIR/pciutils/compressed/${PCIUTILS_FILE_NAME}
     if [ -f "$PCIUTILS_ARCH_PATH" ]; then
         mkdir -p $ARCHIVE_PATH
         mk_softlink_to_dest $PCIUTILS_ARCH_PATH $ARCHIVE_PATH/$PCIUTILS_FILE_NAME
@@ -36,6 +38,8 @@ EOF
 }
 
 function make_pciutils () {
+    export PCIUTILS_FILE_NAME=${PCIUTILS}.tar.gz
+    export PCIUTILS_ARCH_PATH=$ROOT_DIR/pciutils/compressed/${PCIUTILS_FILE_NAME}
     get_pciutils
     tar_package       || return 1
     mk_pciutils

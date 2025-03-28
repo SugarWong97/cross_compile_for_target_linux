@@ -2,11 +2,13 @@ export NCURSES=ncurses-6.0
 
 
 ## for others
-NCURSES_FILE_NAME=${NCURSES}.tar.gz
-NCURSES_ARCH_PATH=$ROOT_DIR/ncurses/compressed/${NCURSES_FILE_NAME}
+export NCURSES_FILE_NAME=${NCURSES}.tar.gz
+export NCURSES_ARCH_PATH=$ROOT_DIR/ncurses/compressed/${NCURSES_FILE_NAME}
 
 ### NCURSES
 function get_ncurses () {
+    export NCURSES_FILE_NAME=${NCURSES}.tar.gz
+    export NCURSES_ARCH_PATH=$ROOT_DIR/ncurses/compressed/${NCURSES_FILE_NAME}
     if [ -f "$NCURSES_ARCH_PATH" ]; then
         mkdir -p $ARCHIVE_PATH
         mk_softlink_to_dest $NCURSES_ARCH_PATH $ARCHIVE_PATH/$NCURSES_FILE_NAME
@@ -30,6 +32,8 @@ function mk_ncurses () {
 }
 
 function make_ncurses () {
+    export NCURSES_FILE_NAME=${NCURSES}.tar.gz
+    export NCURSES_ARCH_PATH=$ROOT_DIR/ncurses/compressed/${NCURSES_FILE_NAME}
     get_ncurses
     tar_package       || return 1
     mk_ncurses

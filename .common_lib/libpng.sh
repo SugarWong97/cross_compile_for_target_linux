@@ -3,10 +3,12 @@ LIBPNG_VERSION=1.2.59
 LIBPNG=libpng-${LIBPNG_VERSION}
 
 ## for others
-LIBPNG_FILE_NAME=${LIBPNG}.tar.gz
-LIBPNG_ARCH_PATH=$ROOT_DIR/libpng/compressed/${LIBPNG_FILE_NAME}
+export LIBPNG_FILE_NAME=${LIBPNG}.tar.gz
+export LIBPNG_ARCH_PATH=$ROOT_DIR/libpng/compressed/${LIBPNG_FILE_NAME}
 
 function get_libpng () {
+    export LIBPNG_FILE_NAME=${LIBPNG}.tar.gz
+    export LIBPNG_ARCH_PATH=$ROOT_DIR/libpng/compressed/${LIBPNG_FILE_NAME}
     if [ -f "$ZLIB_ARCH_PATH" ]; then
         mkdir -p $ARCHIVE_PATH
         mk_softlink_to_dest $LIBPNG_ARCH_PATH $ARCHIVE_PATH/$LIBPNG_FILE_NAME
@@ -44,6 +46,8 @@ EOF
 
 function make_libpng ()
 {
+    export LIBPNG_FILE_NAME=${LIBPNG}.tar.gz
+    export LIBPNG_ARCH_PATH=$ROOT_DIR/libpng/compressed/${LIBPNG_FILE_NAME}
     download_png  || return 1
     tar_package || return 1
     mk_zlib  || return 1

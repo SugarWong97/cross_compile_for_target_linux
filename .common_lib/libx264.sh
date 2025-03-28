@@ -1,8 +1,8 @@
 export X264=x264
 export X264_VERSION=${X264}-snapshot-20191217-2245
 ## for others
-X264_FILE_NAME=${X264_VERSION}.tar.bz2
-X264_ARCH_PATH=$ROOT_DIR/libx264/compressed/${X264_FILE_NAME}
+export X264_FILE_NAME=${X264_VERSION}.tar.bz2
+export X264_ARCH_PATH=$ROOT_DIR/libx264/compressed/${X264_FILE_NAME}
 
 # 下列有些编译选项可能会影响到编译是否正常，需要结合gcc做确认
 ### 通过y/n来配置libx264是否启用ASM（默认禁用）
@@ -15,6 +15,8 @@ export X264_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/x264
 
 ### X264
 function get_x264 () {
+    export X264_FILE_NAME=${X264_VERSION}.tar.bz2
+    export X264_ARCH_PATH=$ROOT_DIR/libx264/compressed/${X264_FILE_NAME}
     if [ -f "$X264_ARCH_PATH" ]; then
         mkdir -p $ARCHIVE_PATH
         mk_softlink_to_dest $X264_ARCH_PATH $ARCHIVE_PATH/$X264_FILE_NAME
@@ -101,6 +103,8 @@ EOF
 }
 
 function make_x264 () {
+    export X264_FILE_NAME=${X264_VERSION}.tar.bz2
+    export X264_ARCH_PATH=$ROOT_DIR/libx264/compressed/${X264_FILE_NAME}
     get_x264
     tar_package       || return 1
     mk_x264 && return 0
@@ -108,6 +112,8 @@ function make_x264 () {
 }
 
 function make_x264_host () {
+    export X264_FILE_NAME=${X264_VERSION}.tar.bz2
+    export X264_ARCH_PATH=$ROOT_DIR/libx264/compressed/${X264_FILE_NAME}
     get_x264
     tar_package       || return 1
     mk_x264_host && return 0

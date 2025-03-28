@@ -2,12 +2,14 @@ export READLINE=readline-6.3
 READLINE_OUTPUT=${OUTPUT_PATH}/${READLINE}
 
 ## for others
-READLINE_FILE_NAME=${READLINE}.tar.gz
-READLINE_ARCH_PATH=$ROOT_DIR/readline/compressed/${READLINE_FILE_NAME}
+export READLINE_FILE_NAME=${READLINE}.tar.gz
+export READLINE_ARCH_PATH=$ROOT_DIR/readline/compressed/${READLINE_FILE_NAME}
 export READLINE_CONFIGURE_ADD=""
 
 ### READLINE
 function get_readline () {
+    export READLINE_FILE_NAME=${READLINE}.tar.gz
+    export READLINE_ARCH_PATH=$ROOT_DIR/readline/compressed/${READLINE_FILE_NAME}
     if [ -f "$READLINE_ARCH_PATH" ]; then
         mkdir -p $ARCHIVE_PATH
         mk_softlink_to_dest $READLINE_ARCH_PATH $ARCHIVE_PATH/$READLINE_FILE_NAME
@@ -31,6 +33,8 @@ EOF
 }
 
 function make_readline () {
+    export READLINE_FILE_NAME=${READLINE}.tar.gz
+    export READLINE_ARCH_PATH=$ROOT_DIR/readline/compressed/${READLINE_FILE_NAME}
     get_readline
     tar_package       || return 1
     mk_readline

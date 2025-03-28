@@ -10,6 +10,7 @@ GLIB_ARCH_PATH=$ROOT_DIR/glib/compressed/${GLIB_FILE_NAME}
 
 ### GLIB
 function get_glib () {
+    export GLIB_VERSION=${GLIB}-${CONFIG_GLIB_VERSION}
     get_libffi
     get_zlib
     if [ -f "$GLIB_ARCH_PATH" ]; then

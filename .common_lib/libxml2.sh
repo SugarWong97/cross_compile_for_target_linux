@@ -1,10 +1,12 @@
 
 LIBXML2=libxml2-2.9.9
 ## for others
-LIBXML2_FILE_NAME=${LIBXML2}.tar.gz
-LIBXML2_ARCH_PATH=$ROOT_DIR/libxml2/compressed/${LIBXML2_FILE_NAME}
+export LIBXML2_FILE_NAME=${LIBXML2}.tar.gz
+export LIBXML2_ARCH_PATH=$ROOT_DIR/libxml2/compressed/${LIBXML2_FILE_NAME}
 
 get_libxml2 () {
+    export LIBXML2_FILE_NAME=${LIBXML2}.tar.gz
+    export LIBXML2_ARCH_PATH=$ROOT_DIR/libxml2/compressed/${LIBXML2_FILE_NAME}
     if [ -f "$LIBXML2_ARCH_PATH" ]; then
         mkdir -p $ARCHIVE_PATH
         #cp -v $ROOT_DIR/zlib/compressed/${LIBXML2}.tar.gz $ARCHIVE_PATH
@@ -30,6 +32,8 @@ mk_libxml2 () {
 }
 make_libxml2()
 {
+    export LIBXML2_FILE_NAME=${LIBXML2}.tar.gz
+    export LIBXML2_ARCH_PATH=$ROOT_DIR/libxml2/compressed/${LIBXML2_FILE_NAME}
     get_libxml2
     tar_package
     mk_libxml2

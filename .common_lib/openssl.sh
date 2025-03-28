@@ -4,11 +4,13 @@ export OPENSSL_VERSION=openssl-$CONFIG_OPENSSL
 export OPENSSL_OUTPUT_PATH=${OUTPUT_PATH}/${OPENSSL}
 
 ## for others
-OPENSSL_FILE_NAME=${OPENSSL_VERSION}.tar.gz
-OPENSSL_ARCH_PATH=$ROOT_DIR/openssl/compressed/${OPENSSL_FILE_NAME}
+export OPENSSL_FILE_NAME=${OPENSSL_VERSION}.tar.gz
+export OPENSSL_ARCH_PATH=$ROOT_DIR/openssl/compressed/${OPENSSL_FILE_NAME}
 
 ### OPENSSL
 function get_ssl () {
+    export OPENSSL_FILE_NAME=${OPENSSL_VERSION}.tar.gz
+    export OPENSSL_ARCH_PATH=$ROOT_DIR/openssl/compressed/${OPENSSL_FILE_NAME}
     if [ -f "$OPENSSL_ARCH_PATH" ]; then
         mkdir -p $ARCHIVE_PATH
         mk_softlink_to_dest $OPENSSL_ARCH_PATH $ARCHIVE_PATH/$OPENSSL_FILE_NAME
@@ -53,6 +55,8 @@ EOF
 }
 
 function make_ssl () {
+    export OPENSSL_FILE_NAME=${OPENSSL_VERSION}.tar.gz
+    export OPENSSL_ARCH_PATH=$ROOT_DIR/openssl/compressed/${OPENSSL_FILE_NAME}
     get_ssl
     tar_package       || return 1
     mk_ssl || return 1
