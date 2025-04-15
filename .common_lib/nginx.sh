@@ -1,4 +1,3 @@
-PCRE=pcre-8.30
 #NGINX=nginx-1.17.6
 NGINX=nginx-1.25.4
 
@@ -15,8 +14,7 @@ download_nginx () {
     #下载包
     get_zlib
     get_ssl
-    # 注意地址
-    tget https://jaist.dl.sourceforge.net/project/pcre/pcre/8.30/${PCRE}.tar.bz2
+    get_pcre
     tget http://mirrors.sohu.com/nginx/${NGINX}.tar.gz
 }
 
@@ -49,9 +47,9 @@ configure_nginx () {
     --with-cpp=${_CPP} \
     --with-ld-opt=-lpthread \
     --with-cc-opt='-D_FILE_OFFSET_BITS=64 -D__USE_FILE_OFFSET64' \
-    --with-pcre=${CODE_PATH}/${PCRE} \
-    --with-openssl=${CODE_PATH}/${OPENSSL} \
-    --with-zlib=${CODE_PATH}/${ZLIB} \
+    --with-pcre=${CODE_PATH}/${PCRE_VERSION} \
+    --with-openssl=${CODE_PATH}/${OPENSSL_VERSION} \
+    --with-zlib=${CODE_PATH}/${ZLIB_VERSION} \
     --with-http_v2_module
 EOF
     ) > $DEBUG_NGINX_CONFIG_CMD
