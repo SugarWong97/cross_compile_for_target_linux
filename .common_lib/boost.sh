@@ -1,11 +1,18 @@
+BOOST=boost
 export CONFIG_BOOST_VERSION=1.86.0
+export BOOST_VERSION=${BOOST}_${CONFIG_BOOST_VERSION}
+
 export BOOST_OUTPUT_PATH=${OUTPUT_PATH}/boost
 export BOOST_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/boost
+
+## for others
+export BOOST_FILE_NAME=`echo ${BOOST_VERSION} | sed 's/\./\_/g'`.tar.bz2
+export BOOST_ARCH_PATH=$ROOT_DIR/boost/compressed/${BOOST_FILE_NAME}
 
 export BUILD_BOOST_FOR_HOST
 export BUILD_BOOST_FOR_TARGET
 
-set_boost()
+set_build_boost()
 {
     if [ "$BUILD_BOOST_FOR_HOST" = "n" ];then
         export BOOST_FOR_HOST="no"
@@ -20,10 +27,21 @@ set_boost()
     fi
 }
 
-download_boost_package () {
-    local version_dot=`echo $CONFIG_BOOST_VERSION | sed 's/\./\_/g'`
-    #### https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.bz2
-    tget https://archives.boost.io/release/${CONFIG_BOOST_VERSION}/source/boost_${version_dot}.tar.bz2
+get_boost () {
+    export BOOST_VERSION=${BOOST}_${CONFIG_BOOST_VERSION}
+    ## for others
+    export BOOST_FILE_NAME=`echo ${BOOST_VERSION} | sed 's/\./\_/g'`.tar.bz2
+    export BOOST_ARCH_PATH=$ROOT_DIR/boost/compressed/${BOOST_FILE_NAME}
+
+    #local version_dot=`echo $CONFIG_BOOST_VERSION | sed 's/\./\_/g'`
+    if [ -f "$BOOST_ARCH_PATH" ]; then
+        mkdir -p $ARCHIVE_PATH
+        mk_softlink_to_dest $BOOST_ARCH_PATH $ARCHIVE_PATH/$BOOST_FILE_NAME
+        return
+    else
+        #### https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.bz2
+        tget https://archives.boost.io/release/${CONFIG_BOOST_VERSION}/source/$BOOST_FILE_NAME
+    fi
 }
 
 mk_boost()
@@ -51,8 +69,8 @@ mk_boost()
 
 make_boost()
 {
-    set_boost
-    download_boost_package
+    set_build_boost
+    get_boost
     tar_package
     mk_boost
 }
