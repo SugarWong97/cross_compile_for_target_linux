@@ -8,7 +8,8 @@ else
 #as bash
 A0=${BASH_SOURCE[0]}
 fi
-export ROOT_DIR=`dirname $A0`
+ROOT_DIR=`dirname $A0`
+export ROOT_DIR=`cd $ROOT_DIR; pwd`
 export THIS_SH=`basename $A0`
 export COMMON_SH_DIR=$ROOT_DIR/.common_lib
 
@@ -139,6 +140,57 @@ function tgit () { #try git and tar
 
     add_download_mark ${filename}
     echo "[OK] Cloned [${filename}] "
+}
+
+# 通过try wget 的方式下载包到公共的目录下并更新软链接
+function tget_package_from_arch ()
+{
+    local arch_file_path="$1"
+    local link_to="$2"
+    local download_url="$3"
+
+    local cur_dir=`pwd`
+    mkdir -p $ARCHIVE_PATH
+
+    if [ ! -f "$arch_file_path" ]; then
+        tget $download_url  || return
+        cd $cur_dir
+        mv $ARCHIVE_PATH/`basename $arch_file_path` $arch_file_path  > /dev/null 2>&1
+    fi
+    mk_softlink_to_dest $arch_file_path  $link_to
+}
+function tget_package_from_arch_with_rename ()
+{
+    local arch_file_path="$1"
+    local link_to="$2"
+    local download_url="$3"
+    local real_url_file_name="$4"
+
+    local cur_dir=`pwd`
+    mkdir -p $ARCHIVE_PATH
+
+    if [ ! -f "$arch_file_path" ]; then
+        tget_and_rename $download_url $real_url_file_name || return
+        cd $cur_dir
+        mv $ARCHIVE_PATH/`basename $arch_file_path` $arch_file_path  > /dev/null 2>&1
+    fi
+    mk_softlink_to_dest $arch_file_path  $link_to
+}
+function tgit_package_from_arch ()
+{
+    local arch_file_path="$1"
+    local link_to="$2"
+    local download_url="$3"
+
+    local cur_dir=`pwd`
+    mkdir -p $ARCHIVE_PATH
+
+    if [ ! -f "$arch_file_path" ]; then
+        tgit $download_url  || return
+        cd $cur_dir
+        mv $ARCHIVE_PATH/`basename $arch_file_path` $arch_file_path  > /dev/null 2>&1
+    fi
+    mk_softlink_to_dest $arch_file_path  $link_to
 }
 
 function tar_package () {
