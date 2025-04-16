@@ -6,17 +6,18 @@ export HAVEGED_OUTPUT_PATH=${OUTPUT_PATH}/${HAVEGED}
 export HAVEGED_FILE_NAME=${HAVEGED}-${CONFIG_HAVEGED_VERSION}.tar.bz2
 export HAVEGED_ARCH_PATH=$ROOT_DIR/${HAVEGED}/compressed/${HAVEGED_FILE_NAME}
 
-get_haveged()
+function _sync_export_var_haveged()
 {
     export HAVEGED_FILE_NAME=${HAVEGED}-${CONFIG_HAVEGED_VERSION}.tar.bz2
     export HAVEGED_ARCH_PATH=$ROOT_DIR/${HAVEGED}/compressed/${HAVEGED_FILE_NAME}
-    if [ -f "$HAVEGED_ARCH_PATH" ]; then
-        mkdir -p $ARCHIVE_PATH
-        mk_softlink_to_dest $HAVEGED_ARCH_PATH $ARCHIVE_PATH/$HAVEGED_FILE_NAME
-    else
-        # https://www.issihosts.com/haveged/downloads.html
-        tget https://www.issihosts.com/haveged/haveged-${CONFIG_HAVEGED_VERSION}.tar.gz
-    fi
+}
+
+get_haveged()
+{
+    _sync_export_var_haveged
+
+    # https://www.issihosts.com/haveged/downloads.html
+    tget_package_from_arch $HAVEGED_ARCH_PATH  $ARCHIVE_PATH/$HAVEGED_FILE_NAME https://www.issihosts.com/haveged/haveged-${CONFIG_HAVEGED_VERSION}.tar.gz
 }
 
 function mk_haveged () {
@@ -38,7 +39,7 @@ EOF
 
 make_haveged()
 {
-    export HAVEGED_FILE_NAME=${HAVEGED}-${CONFIG_HAVEGED_VERSION}.tar.bz2
+    _sync_export_var_haveged
     get_haveged
     tar_package
     mk_haveged

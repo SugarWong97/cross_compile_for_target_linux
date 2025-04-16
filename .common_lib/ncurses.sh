@@ -5,17 +5,16 @@ export NCURSES=ncurses-6.0
 export NCURSES_FILE_NAME=${NCURSES}.tar.gz
 export NCURSES_ARCH_PATH=$ROOT_DIR/ncurses/compressed/${NCURSES_FILE_NAME}
 
-### NCURSES
-function get_ncurses () {
+function _sync_export_var_ncurses()
+{
     export NCURSES_FILE_NAME=${NCURSES}.tar.gz
     export NCURSES_ARCH_PATH=$ROOT_DIR/ncurses/compressed/${NCURSES_FILE_NAME}
-    if [ -f "$NCURSES_ARCH_PATH" ]; then
-        mkdir -p $ARCHIVE_PATH
-        mk_softlink_to_dest $NCURSES_ARCH_PATH $ARCHIVE_PATH/$NCURSES_FILE_NAME
-        return
-    else
-        tget https://ftp.gnu.org/pub/gnu/ncurses/${NCURSES}.tar.gz
-    fi
+}
+
+### NCURSES
+function get_ncurses () {
+    _sync_export_var_ncurses
+    tget_package_from_arch $NCURSES_ARCH_PATH  $ARCHIVE_PATH/$NCURSES_FILE_NAME https://ftp.gnu.org/pub/gnu/ncurses/${NCURSES}.tar.gz
 }
 
 function mk_ncurses () {
@@ -32,8 +31,7 @@ function mk_ncurses () {
 }
 
 function make_ncurses () {
-    export NCURSES_FILE_NAME=${NCURSES}.tar.gz
-    export NCURSES_ARCH_PATH=$ROOT_DIR/ncurses/compressed/${NCURSES_FILE_NAME}
+    _sync_export_var_ncurses
     get_ncurses
     tar_package       || return 1
     mk_ncurses

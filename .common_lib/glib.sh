@@ -8,25 +8,26 @@ export GLIB_OUTPUT_PATH=${OUTPUT_PATH}/${GLIB}
 GLIB_FILE_NAME=${GLIB}.tar.gz
 GLIB_ARCH_PATH=$ROOT_DIR/glib/compressed/${GLIB_FILE_NAME}
 
+function _sync_export_var_glib()
+{
+    export GLIB_VERSION=${GLIB}-${CONFIG_GLIB_VERSION}
+    export GLIB_FILE_NAME=${GLIB}.tar.gz
+    export GLIB_ARCH_PATH=$ROOT_DIR/glib/compressed/${GLIB_FILE_NAME}
+}
+
 ### GLIB
 function get_glib () {
-    export GLIB_VERSION=${GLIB}-${CONFIG_GLIB_VERSION}
+    _sync_export_var_glib
     get_libffi
     get_zlib
-    if [ -f "$GLIB_ARCH_PATH" ]; then
-        mkdir -p $ARCHIVE_PATH
-        mk_softlink_to_dest $GLIB_ARCH_PATH $ARCHIVE_PATH/$GLIB_FILE_NAME
-        return
-    else
-        # 2.56.1 -> 2.56
-        local subversion=`echo ${CONFIG_GLIB_VERSION%.*}`
 
-        ### X! https://gitlab.gnome.org/GNOME/glib/-/archive/2.80.5/glib-2.80.5.tar.gz
-        tget https://download.gnome.org/sources/glib/${subversion}/${GLIB_VERSION}.tar.xz
-    fi
+    # 2.56.1 -> 2.56
+    local subversion=`echo ${CONFIG_GLIB_VERSION%.*}`
+    tget_package_from_arch $GLIB_ARCH_PATH  $ARCHIVE_PATH/$GLIB_FILE_NAME  https://download.gnome.org/sources/glib/${subversion}/${GLIB_VERSION}.tar.xz
 }
 
 function mk_glib () {
+    _sync_export_var_glib
     mk_zlib
     mk_libffi
 bash <<EOF
@@ -48,7 +49,7 @@ EOF
 }
 
 function make_glib () {
-    export GLIB_VERSION=${GLIB}-${CONFIG_GLIB_VERSION}
+    _sync_export_var_glib
     get_glib
     tar_package       || return 1
     mk_glib

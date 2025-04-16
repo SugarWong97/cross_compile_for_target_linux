@@ -6,17 +6,16 @@ export READLINE_FILE_NAME=${READLINE}.tar.gz
 export READLINE_ARCH_PATH=$ROOT_DIR/readline/compressed/${READLINE_FILE_NAME}
 export READLINE_CONFIGURE_ADD=""
 
-### READLINE
-function get_readline () {
+function _sync_export_var_readline()
+{
     export READLINE_FILE_NAME=${READLINE}.tar.gz
     export READLINE_ARCH_PATH=$ROOT_DIR/readline/compressed/${READLINE_FILE_NAME}
-    if [ -f "$READLINE_ARCH_PATH" ]; then
-        mkdir -p $ARCHIVE_PATH
-        mk_softlink_to_dest $READLINE_ARCH_PATH $ARCHIVE_PATH/$READLINE_FILE_NAME
-        return
-    else
-        tget ftp://ftp.gnu.org/gnu/readline/${READLINE}.tar.gz
-    fi
+}
+
+### READLINE
+function get_readline () {
+    _sync_export_var_readline
+    tget_package_from_arch $READLINE_ARCH_PATH $ARCHIVE_PATH/$READLINE_FILE_NAME  ftp://ftp.gnu.org/gnu/readline/${READLINE}.tar.gz
 }
 
 function mk_readline () {
@@ -33,8 +32,7 @@ EOF
 }
 
 function make_readline () {
-    export READLINE_FILE_NAME=${READLINE}.tar.gz
-    export READLINE_ARCH_PATH=$ROOT_DIR/readline/compressed/${READLINE_FILE_NAME}
+    _sync_export_var_readline
     get_readline
     tar_package       || return 1
     mk_readline

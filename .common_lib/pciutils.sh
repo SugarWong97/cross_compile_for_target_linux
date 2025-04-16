@@ -4,17 +4,15 @@ export PCIUTILS=pciutils-3.12.0
 export PCIUTILS_FILE_NAME=${PCIUTILS}.tar.gz
 export PCIUTILS_ARCH_PATH=$ROOT_DIR/pciutils/compressed/${PCIUTILS_FILE_NAME}
 
-### PCIUTILS
-function get_pciutils () {
+function _sync_export_var_pciutils()
+{
     export PCIUTILS_FILE_NAME=${PCIUTILS}.tar.gz
     export PCIUTILS_ARCH_PATH=$ROOT_DIR/pciutils/compressed/${PCIUTILS_FILE_NAME}
-    if [ -f "$PCIUTILS_ARCH_PATH" ]; then
-        mkdir -p $ARCHIVE_PATH
-        mk_softlink_to_dest $PCIUTILS_ARCH_PATH $ARCHIVE_PATH/$PCIUTILS_FILE_NAME
-        return
-    else
-        tget https://mirrors.edge.kernel.org/pub/software/utils/pciutils/${PCIUTILS}.tar.gz
-    fi
+}
+
+function get_pciutils () {
+    _sync_export_var_pciutils
+    tget_package_from_arch  $PCIUTILS_ARCH_PATH $ARCHIVE_PATH/$PCIUTILS_FILE_NAME  https://mirrors.edge.kernel.org/pub/software/utils/pciutils/${PCIUTILS}.tar.gz
 }
 
 function mk_pciutils () {
@@ -38,8 +36,7 @@ EOF
 }
 
 function make_pciutils () {
-    export PCIUTILS_FILE_NAME=${PCIUTILS}.tar.gz
-    export PCIUTILS_ARCH_PATH=$ROOT_DIR/pciutils/compressed/${PCIUTILS_FILE_NAME}
+    _sync_export_var_pciutils
     get_pciutils
     tar_package       || return 1
     mk_pciutils

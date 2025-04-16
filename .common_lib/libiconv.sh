@@ -4,18 +4,16 @@ LIBICONV=libiconv-1.15
 export LIBICONV_FILE_NAME=${LIBICONV}.tar.gz
 export LIBICONV_ARCH_PATH=$ROOT_DIR/libiconv/compressed/${LIBICONV_FILE_NAME}
 
-get_libiconv () {
+function _sync_export_var_libiconv()
+{
     export LIBICONV_FILE_NAME=${LIBICONV}.tar.gz
     export LIBICONV_ARCH_PATH=$ROOT_DIR/libiconv/compressed/${LIBICONV_FILE_NAME}
-    if [ -f "$LIBICONV_ARCH_PATH" ]; then
-        mkdir -p $ARCHIVE_PATH
-        #cp -v $ROOT_DIR/zlib/compressed/${LIBICONV}.tar.gz $ARCHIVE_PATH
-        #ln -s $ROOT_DIR/zlib/compressed/${LIBICONV}.tar.gz $ARCHIVE_PATH
-        mk_softlink_to_dest $LIBICONV_ARCH_PATH $ARCHIVE_PATH/$LIBICONV_FILE_NAME
-    else
-        tget http://ftp.gnu.org/pub/gnu/libiconv/${LIBICONV}.tar.gz
-        cp $ARCHIVE_PATH/$LIBICONV_FILE_NAME $LIBICONV_ARCH_PATH
-    fi
+}
+
+get_libiconv () {
+    _sync_export_var_libiconv
+
+    tget_package_from_arch $LIBICONV_ARCH_PATH  $ARCHIVE_PATH/$LIBICONV_FILE_NAME http://ftp.gnu.org/pub/gnu/libiconv/${LIBICONV}.tar.gz
 }
 
 
@@ -27,8 +25,7 @@ mk_iconv () {
 }
 
 make_iconv () {
-    export LIBICONV_FILE_NAME=${LIBICONV}.tar.gz
-    export LIBICONV_ARCH_PATH=$ROOT_DIR/libiconv/compressed/${LIBICONV_FILE_NAME}
+    _sync_export_var_libiconv
     get_libiconv
     tar_package
     mk_iconv

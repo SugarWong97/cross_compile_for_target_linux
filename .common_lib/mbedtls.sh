@@ -18,16 +18,10 @@ function _sync_export_var_mbedtls_v2()
 
 function get_mbedtls_v2 () {
     _sync_export_var_mbedtls_v2
-    if [ -f "$MBEDTLS_ARCH_PATH" ]; then
-        mkdir -p $ARCHIVE_PATH
-        mk_softlink_to_dest $MBEDTLS_ARCH_PATH $ARCHIVE_PATH/$MBEDTLS_FILE_NAME
-        return
-    else
-        ##   https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.3/mbedtls-3.6.3.tar.bz2
-        #tget https://github.com/Mbed-TLS/mbedtls/releases/download/${MBEDTLS_VERSION3}/${MBEDTLS_FILE_NAME}
-        ##   https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v2.16.12.tar.gz
-        tget_and_rename https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v${CONFIG_MBEDTLS_VERSION2}.tar.gz $MBEDTLS_FILE_NAME
-    fi
+    ##   https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.3/mbedtls-3.6.3.tar.bz2
+    #tget https://github.com/Mbed-TLS/mbedtls/releases/download/${MBEDTLS_VERSION3}/${MBEDTLS_FILE_NAME}
+    ##   https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v2.16.12.tar.gz
+    tget_package_from_arch_with_rename $MBEDTLS_ARCH_PATH $ARCHIVE_PATH/$MBEDTLS_FILE_NAME  https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v${CONFIG_MBEDTLS_VERSION2}.tar.gz $MBEDTLS_FILE_NAME
 }
 
 function mk_mbedtls_v2 () {

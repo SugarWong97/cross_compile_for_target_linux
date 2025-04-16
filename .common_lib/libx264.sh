@@ -13,17 +13,16 @@ export USING_X264_OPENCL
 export X264_OUTPUT_PATH=${OUTPUT_PATH}/x264
 export X264_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/x264
 
-### X264
-function get_x264 () {
+function _sync_export_var_x264()
+{
     export X264_FILE_NAME=${X264_VERSION}.tar.bz2
     export X264_ARCH_PATH=$ROOT_DIR/libx264/compressed/${X264_FILE_NAME}
-    if [ -f "$X264_ARCH_PATH" ]; then
-        mkdir -p $ARCHIVE_PATH
-        mk_softlink_to_dest $X264_ARCH_PATH $ARCHIVE_PATH/$X264_FILE_NAME
-        return
-    else
-        tget http://download.videolan.org/pub/videolan/x264/snapshots/${X264_FILE_NAME}
-    fi
+}
+
+### X264
+function get_x264 () {
+    _sync_export_var_x264
+    tget_package_from_arch $X264_ARCH_PATH  $ARCHIVE_PATH/$X264_FILE_NAME http://download.videolan.org/pub/videolan/x264/snapshots/${X264_FILE_NAME}
 }
 
 function _x264_gen_make_sh () {
@@ -103,8 +102,7 @@ EOF
 }
 
 function make_x264 () {
-    export X264_FILE_NAME=${X264_VERSION}.tar.bz2
-    export X264_ARCH_PATH=$ROOT_DIR/libx264/compressed/${X264_FILE_NAME}
+    _sync_export_var_x264
     get_x264
     tar_package       || return 1
     mk_x264 && return 0
@@ -112,8 +110,7 @@ function make_x264 () {
 }
 
 function make_x264_host () {
-    export X264_FILE_NAME=${X264_VERSION}.tar.bz2
-    export X264_ARCH_PATH=$ROOT_DIR/libx264/compressed/${X264_FILE_NAME}
+    _sync_export_var_x264
     get_x264
     tar_package       || return 1
     mk_x264_host && return 0

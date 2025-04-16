@@ -8,20 +8,18 @@ export PCRE_OUTPUT_PATH=${OUTPUT_PATH}/${PCRE}
 export PCRE_FILE_NAME=${PCRE_VERSION}.tar.bz2
 export PCRE_ARCH_PATH=$ROOT_DIR/pcre/compressed/${PCRE_FILE_NAME}
 
-### PCRE
-function get_pcre () {
+function _sync_export_var_pcre()
+{
     export PCRE_VERSION=${PCRE}-${CONFIG_PCRE_VERSION}
     export PCRE_FILE_NAME=${PCRE_VERSION}.tar.bz2
     export PCRE_ARCH_PATH=$ROOT_DIR/pcre/compressed/${PCRE_FILE_NAME}
+}
 
-    if [ -f "$PCRE_ARCH_PATH" ]; then
-        mkdir -p $ARCHIVE_PATH
-        mk_softlink_to_dest $PCRE_ARCH_PATH $ARCHIVE_PATH/$PCRE_FILE_NAME
-        return
-    else
-        #tget https://jaist.dl.sourceforge.net/project/pcre/pcre/8.30/pcre-8.30.tar.bz2
-        tget https://jaist.dl.sourceforge.net/project/pcre/pcre/$CONFIG_PCRE_VERSION/${PCRE_VERSION}.tar.bz2
-    fi
+### PCRE
+function get_pcre () {
+    _sync_export_var_pcre
+    #     https://jaist.dl.sourceforge.net/project/pcre/pcre/8.30/pcre-8.30.tar.bz2
+    tget_package_from_arch $PCRE_ARCH_PATH $ARCHIVE_PATH/$PCRE_FILE_NAME  https://jaist.dl.sourceforge.net/project/pcre/pcre/$CONFIG_PCRE_VERSION/${PCRE_VERSION}.tar.bz2
 }
 
 function mk_pcre () {
@@ -44,7 +42,7 @@ EOF
 }
 
 function make_pcre () {
-    export PCRE_VERSION=${PCRE}-${CONFIG_PCRE_VERSION}
+    _sync_export_var_pcre
     get_pcre
     tar_package       || return 1
     mk_pcre

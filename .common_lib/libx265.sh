@@ -6,17 +6,15 @@ export X265_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/x265
 export X265_FILE_NAME=${X265}.tar.gz
 export X265_ARCH_PATH=$ROOT_DIR/libx265/compressed/${X265_FILE_NAME}
 
-### X265
-get_x265 () {
+function _sync_export_var_x265()
+{
     export X265_FILE_NAME=${X265}.tar.gz
     export X265_ARCH_PATH=$ROOT_DIR/libx265/compressed/${X265_FILE_NAME}
-    if [ -f "$X265_ARCH_PATH" ]; then
-        mkdir -p $ARCHIVE_PATH
-        mk_softlink_to_dest $X265_ARCH_PATH $ARCHIVE_PATH/$X265_FILE_NAME
-        return
-    else
-        tget http://download.videolan.org/videolan/x265/${X265}.tar.gz
-    fi
+}
+
+get_x265 () {
+    _sync_export_var_x265
+    tget_package_from_arch $X265_ARCH_PATH  $ARCHIVE_PATH/$X265_FILE_NAME http://download.videolan.org/videolan/x265/${X265}.tar.gz
 }
 
 mk_x265() {
@@ -75,8 +73,7 @@ function make_x265 () {
 }
 
 function make_x265_host () {
-    export X265_FILE_NAME=${X265}.tar.gz
-    export X265_ARCH_PATH=$ROOT_DIR/libx265/compressed/${X265_FILE_NAME}
+    _sync_export_var_x265
     get_x265
     tar_package
     mk_x265_host

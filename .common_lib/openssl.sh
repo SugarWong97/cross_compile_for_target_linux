@@ -7,17 +7,16 @@ export OPENSSL_OUTPUT_PATH=${OUTPUT_PATH}/${OPENSSL}
 export OPENSSL_FILE_NAME=${OPENSSL_VERSION}.tar.gz
 export OPENSSL_ARCH_PATH=$ROOT_DIR/openssl/compressed/${OPENSSL_FILE_NAME}
 
-### OPENSSL
-function get_ssl () {
+function _sync_export_var_openssl()
+{
     export OPENSSL_FILE_NAME=${OPENSSL_VERSION}.tar.gz
     export OPENSSL_ARCH_PATH=$ROOT_DIR/openssl/compressed/${OPENSSL_FILE_NAME}
-    if [ -f "$OPENSSL_ARCH_PATH" ]; then
-        mkdir -p $ARCHIVE_PATH
-        mk_softlink_to_dest $OPENSSL_ARCH_PATH $ARCHIVE_PATH/$OPENSSL_FILE_NAME
-        return
-    else
-        tget  https://www.openssl.org/source/${OPENSSL_VERSION}.tar.gz
-    fi
+}
+
+### OPENSSL
+function get_ssl () {
+    _sync_export_var_openssl
+    tget_package_from_arch  $OPENSSL_ARCH_PATH $ARCHIVE_PATH/$OPENSSL_FILE_NAME https://www.openssl.org/source/${OPENSSL_VERSION}.tar.gz
 }
 
 # 删除不需要的Makefile的doc规则
@@ -55,8 +54,7 @@ EOF
 }
 
 function make_ssl () {
-    export OPENSSL_FILE_NAME=${OPENSSL_VERSION}.tar.gz
-    export OPENSSL_ARCH_PATH=$ROOT_DIR/openssl/compressed/${OPENSSL_FILE_NAME}
+    _sync_export_var_openssl
     get_ssl
     tar_package       || return 1
     mk_ssl || return 1

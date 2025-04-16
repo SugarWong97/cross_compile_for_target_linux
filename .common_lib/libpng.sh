@@ -6,16 +6,16 @@ LIBPNG=libpng-${LIBPNG_VERSION}
 export LIBPNG_FILE_NAME=${LIBPNG}.tar.gz
 export LIBPNG_ARCH_PATH=$ROOT_DIR/libpng/compressed/${LIBPNG_FILE_NAME}
 
-function get_libpng () {
+function _sync_export_var_libpng()
+{
     export LIBPNG_FILE_NAME=${LIBPNG}.tar.gz
     export LIBPNG_ARCH_PATH=$ROOT_DIR/libpng/compressed/${LIBPNG_FILE_NAME}
-    if [ -f "$ZLIB_ARCH_PATH" ]; then
-        mkdir -p $ARCHIVE_PATH
-        mk_softlink_to_dest $LIBPNG_ARCH_PATH $ARCHIVE_PATH/$LIBPNG_FILE_NAME
-        return
-    else
-        tget https://udomain.dl.sourceforge.net/project/libpng/libpng12/${LIBPNG_VERSION}/libpng-${LIBPNG_VERSION}.tar.gz
-    fi
+}
+
+function get_libpng () {
+    _sync_export_var_libpng
+
+    tget_package_from_arch $LIBPNG_ARCH_PATH  $ARCHIVE_PATH/$LIBPNG_FILE_NAME https://udomain.dl.sourceforge.net/project/libpng/libpng12/${LIBPNG_VERSION}/libpng-${LIBPNG_VERSION}.tar.gz
 }
 
 download_png () {
@@ -46,8 +46,7 @@ EOF
 
 function make_libpng ()
 {
-    export LIBPNG_FILE_NAME=${LIBPNG}.tar.gz
-    export LIBPNG_ARCH_PATH=$ROOT_DIR/libpng/compressed/${LIBPNG_FILE_NAME}
+    _sync_export_var_libpng
     download_png  || return 1
     tar_package || return 1
     mk_zlib  || return 1
