@@ -1,10 +1,14 @@
 #!/bin/bash
 
+source ../.common
+
 # 通过y/n来配置ffmpeg是否启用 Libx264, Libx265（默认启用）
 #export USING_X264_FOR_FFMPEG=y
 #export USING_X265_FOR_FFMPEG=y
 
-source ../.common
+
+#export CONFIG_FFMPEG_VERSION=4.0.1
+#export CONFIG_FFMPEG_VERSION=7.0
 
 #export X264_OUTPUT_PATH=${OUTPUT_PATH}/x264
 export X264_OUTPUT_PATH=${OUTPUT_PATH}/ffmpeg
