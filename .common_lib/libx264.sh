@@ -1,5 +1,6 @@
 export X264=x264
-export X264_VERSION=${X264}-snapshot-20191217-2245
+export CONFIG_X264_VERSION=snapshot-20191217-2245
+export X264_VERSION=${X264}-${CONFIG_X264_VERSION}
 ## for others
 export X264_FILE_NAME=${X264_VERSION}.tar.bz2
 export X264_ARCH_PATH=$ROOT_DIR/libx264/compressed/${X264_FILE_NAME}
@@ -15,6 +16,7 @@ export X264_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/x264
 
 function _sync_export_var_x264()
 {
+    export X264_VERSION=${X264}-${CONFIG_X264_VERSION}
     export X264_FILE_NAME=${X264_VERSION}.tar.bz2
     export X264_ARCH_PATH=$ROOT_DIR/libx264/compressed/${X264_FILE_NAME}
 }
@@ -76,7 +78,7 @@ function mk_x264() {
     source ./$tmp_config || return 1
 
     make clean
-    make $MKTHD && make install
+    make $MKTHD CC=${_CC} && make install
 }
 
 function mk_x264_host () {
