@@ -1,8 +1,8 @@
 #!/bin/bash
 
 export FFMPEG=ffmpeg
-#export FFMPEG_VERSION=${FFMPEG}-4.0.1
-export CONFIG_FFMPEG_VERSION=7.0
+export CONFIG_FFMPEG_VERSION=4.2.10
+#export CONFIG_FFMPEG_VERSION=7.0
 export FFMPEG_VERSION=${FFMPEG}-${CONFIG_FFMPEG_VERSION}
 
 # 通过y/n来配置ffmpeg是否启用 Libx264, Libx265（默认启用）
@@ -36,6 +36,8 @@ set_ffmpeg()
     else
         export X265_FOR_FFMPEG="yes"
     fi
+
+    export FFMPEG_VERSION=${FFMPEG}-${CONFIG_FFMPEG_VERSION}
 }
 
 download_package_for_ffmpeg () {
