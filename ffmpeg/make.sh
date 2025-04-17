@@ -6,32 +6,33 @@ source ../.common
 #export USING_X264_FOR_FFMPEG=y
 #export USING_X265_FOR_FFMPEG=y
 
-
+########### 指定版本
 #export CONFIG_FFMPEG_VERSION=4.2.10
 #export CONFIG_X264_VERSION=snapshot-20191217-2245
 #export CONFIG_X265_VERSION=3.5
 
-#export X264_OUTPUT_PATH=${OUTPUT_PATH}/x264
-export X264_OUTPUT_PATH=${OUTPUT_PATH}/ffmpeg
 
-#export X265_OUTPUT_PATH=${OUTPUT_PATH}/x265
-export X265_OUTPUT_PATH=${OUTPUT_PATH}/ffmpeg
-
+########### 指定输出路径
+#export X264_OUTPUT_PATH=${OUTPUT_PATH}/ffmpeg
+#export X265_OUTPUT_PATH=${OUTPUT_PATH}/ffmpeg
 #export FFMP_OUTPUT_PATH=${OUTPUT_PATH}/ffmpeg
 
-#export X264_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/x264
-export X264_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/ffmpeg
-#export X265_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/x265
-export X265_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/ffmpeg
+#export X264_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/ffmpeg
+#export X265_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/ffmpeg
+#export FFMPEG_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/ffmpeg
 
 
+
+############ 鉴于gcc版本可能存在差异，USING_X264_ASM可能需要做调整才能编译x264
 # LIBX264 Config(启用libx264时有效)
 ### 通过y/n来配置libx264是否启用ASM（默认禁用）
-export USING_X264_ASM=y
+#export USING_X264_ASM=y
 ### 通过y/n来配置libx264是否启用OPENCL（默认禁用）
 #export USING_X264_OPENCL=n
 
 make_ffmpeg
+
+
 
 ############ 鉴于gcc版本可能存在差异，USING_X264_ASM可能需要做调整才能编译x264
 
