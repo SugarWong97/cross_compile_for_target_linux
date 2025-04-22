@@ -60,6 +60,10 @@ EOF
         X264_CONFIG_STR_OPENCL="--disable-opencl"
     fi
 cat<<EOF
+    echo ""
+    echo "Making libx264.."
+    echo ""
+    sleep 1
     ./configure \
     --enable-shared \
     --enable-pic  ${config_args_add} \
@@ -72,6 +76,7 @@ function _x264_gen_make_sh_host () {
 }
 
 function mk_x264() {
+    _sync_export_var_x264
     cd ${BASE}/source/${X264_VERSION}
 
     _x264_gen_make_sh > $tmp_config
@@ -82,6 +87,7 @@ function mk_x264() {
 }
 
 function mk_x264_host () {
+    _sync_export_var_x264
     cd ${BASE}/source/${X264_VERSION}
 
     _x264_gen_make_sh_host > $tmp_config
@@ -108,6 +114,13 @@ function make_x264 () {
     get_x264
     tar_package       || return 1
     mk_x264 && return 0
+    if [ "$USING_X264_ASM" = "y" ];then
+        USING_X264_ASM=""
+    else
+        USING_X264_ASM="y"
+    fi
+    echo "Remake X264 with !USING_X264_ASM : $USING_X264_ASM"
+    mk_x264 && return 0
     print_x264_fail_info
 }
 
@@ -115,6 +128,13 @@ function make_x264_host () {
     _sync_export_var_x264
     get_x264
     tar_package       || return 1
+    mk_x264_host && return 0
+    if [ "$USING_X264_ASM" = "y" ];then
+        USING_X264_ASM=""
+    else
+        USING_X264_ASM="y"
+    fi
+    echo "Remake X264 with !USING_X264_ASM : $USING_X264_ASM"
     mk_x264_host && return 0
     print_x264_fail_info
     return 1
