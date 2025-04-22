@@ -2,7 +2,7 @@
 TOP_DIR=`pwd`
 INSTALL_DIR=$TOP_DIR/../../install
 
-ARMGCC=`cat ../../../.common | grep 'BUILD_HOST=' | grep -v '#' | awk -F= '{print$2}'`
+BUILD_HOST=`cat ../../../custom.env | grep 'BUILD_HOST=' | grep -v '#' | awk -F= '{print$2}'`
 
 gen_runtime()
 {
@@ -25,7 +25,7 @@ do_cmake()
     mkdir $BUILD_DIR -p
 
     cd $BUILD_DIR
-    cmake .. -DOUTPUT_APPNAME=$APP_NAME -DOUTPUT_DIRNAME=${OUTPUT_DIR} -DCROSS_COMPILE=${ARMGCC}-
+    cmake .. -DOUTPUT_APPNAME=$APP_NAME -DOUTPUT_DIRNAME=${OUTPUT_DIR} -DCROSS_COMPILE=${BUILD_HOST}-
     make -j16
 }
 
