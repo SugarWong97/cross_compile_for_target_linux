@@ -141,6 +141,37 @@ function tgit () { #try git and tar
     add_download_mark ${filename}
     echo "[OK] Cloned [${filename}] "
 }
+# 下载git指定分支并拉取子模块
+function tgit_with_bracnch_and_submod () { #try git and tar
+    local filename=`basename $1 | sed 's/.git//g'`
+    local branch="$2"
+    local arg_for_git_clone=""
+
+    if [ ! -z "$branch" ];then
+        arg_for_git_clone="-b $branch --single-branch "
+    else
+        branch=master
+    fi
+
+    local filename_new=${filename}-${branch}
+
+    cd ${ARCHIVE_PATH}
+    echo "Clone [${filename_new}]..."
+    if [ ! -f ${filename_new}.tgz ];then
+        git clone $arg_for_git_clone $1 $filename_new || return 1
+        bash <<EOF
+        cd ${filename_new}
+        git submodule update --init
+        cd ..
+EOF
+        echo "Making a tar file."
+        tar -zcf ${filename_new}.tgz ${filename_new}
+        rm ${filename_new} -rf
+    fi
+
+    add_download_mark ${filename_new}.tgz
+    echo "[OK] Cloned [${filename_new}] "
+}
 
 # 通过try wget 的方式下载包到公共的目录下并更新软链接
 function tget_package_from_arch ()
