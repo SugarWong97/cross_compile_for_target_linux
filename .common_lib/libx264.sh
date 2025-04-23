@@ -55,6 +55,8 @@ EOF
 
     if [ "$X264_ASM_DIS" = "yes" ]; then
         X264_CONFIG_STR_ASM="--disable-asm"
+    else
+        X264_CONFIG_STR_ASM=""
     fi
     if [ "$X264_OPENCL_DIS" = "yes" ]; then
         X264_CONFIG_STR_OPENCL="--disable-opencl"
@@ -68,7 +70,6 @@ cat<<EOF
     --enable-shared \
     --enable-pic  ${config_args_add} \
      ${X264_CONFIG_STR_OPENCL} ${X264_CONFIG_STR_ASM}
-
 EOF
 }
 function _x264_gen_make_sh_host () {
@@ -83,7 +84,8 @@ function mk_x264() {
     source ./$tmp_config || return 1
 
     make clean
-    make $MKTHD CC=${_CC} && make install
+    make $MKTHD CC=${_CC} || return 1
+    make install
 }
 
 function mk_x264_host () {
@@ -94,7 +96,8 @@ function mk_x264_host () {
     source ./$tmp_config || return 1
 
     make clean
-    make $MKTHD && make install
+    make $MKTHD CC=gcc  || return 1
+    make install
 }
 
 function print_x264_fail_info ()
@@ -114,14 +117,16 @@ function make_x264 () {
     get_x264
     tar_package       || return 1
     mk_x264 && return 0
-    if [ "$USING_X264_ASM" = "y" ];then
-        USING_X264_ASM=""
+    export USING_X264_ASM
+    if [ "$USING_X264_ASM" != "y" ];then
+        export USING_X264_ASM="y"
     else
-        USING_X264_ASM="y"
+        export USING_X264_ASM="y"
     fi
     echo "Remake X264 with !USING_X264_ASM : $USING_X264_ASM"
     mk_x264 && return 0
     print_x264_fail_info
+    return 1
 }
 
 function make_x264_host () {
@@ -129,10 +134,11 @@ function make_x264_host () {
     get_x264
     tar_package       || return 1
     mk_x264_host && return 0
-    if [ "$USING_X264_ASM" = "y" ];then
-        USING_X264_ASM=""
+    export USING_X264_ASM
+    if [ "$USING_X264_ASM" != "y" ];then
+        export USING_X264_ASM="y"
     else
-        USING_X264_ASM="y"
+        export USING_X264_ASM="y"
     fi
     echo "Remake X264 with !USING_X264_ASM : $USING_X264_ASM"
     mk_x264_host && return 0
