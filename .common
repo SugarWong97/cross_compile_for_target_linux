@@ -182,6 +182,7 @@ function tget_package_from_arch ()
 
     local cur_dir=`pwd`
     mkdir -p $ARCHIVE_PATH
+    mkdir -p `dirname $arch_file_path`
 
     if [ ! -f "$arch_file_path" ]; then
         tget $download_url  || return
@@ -199,6 +200,7 @@ function tget_package_from_arch_with_rename ()
 
     local cur_dir=`pwd`
     mkdir -p $ARCHIVE_PATH
+    mkdir -p `dirname $arch_file_path`
 
     if [ ! -f "$arch_file_path" ]; then
         tget_and_rename $download_url $real_url_file_name || return
@@ -215,6 +217,7 @@ function tgit_package_from_arch ()
 
     local cur_dir=`pwd`
     mkdir -p $ARCHIVE_PATH
+    mkdir -p `dirname $arch_file_path`
 
     if [ ! -f "$arch_file_path" ]; then
         tgit $download_url  || return
