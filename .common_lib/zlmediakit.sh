@@ -3,6 +3,9 @@ ZLMEDIAKIT=ZLMediaKit
 export CONFIG_ZLMEDIAKIT_VERSION=master
 export ZLMEDIAKIT_VERSION=${ZLMEDIAKIT}-${CONFIG_ZLMEDIAKIT_VERSION}
 
+export ZLMEDIAKIT_URL=https://github.com/ZLMediaKit/ZLMediaKit
+#export ZLMEDIAKIT_URL=https://gitee.com/xia-chu/ZLMediaKit
+
 export ZLMEDIAKIT_OUTPUT_PATH=${OUTPUT_PATH}/${ZLMEDIAKIT}
 export ZLMEDIAKIT_OUTPUT_PATH_HOST=${OUTPUT_PATH_HOST}/${ZLMEDIAKIT}
 
@@ -52,7 +55,7 @@ function get_zlmediakit () {
         get_ffmpeg
     fi
 
-    tgit_with_bracnch_and_submod  https://github.com/ZLMediaKit/ZLMediaKit $CONFIG_ZLMEDIAKIT_VERSION
+    tgit_with_bracnch_and_submod  $ZLMEDIAKIT_URL $CONFIG_ZLMEDIAKIT_VERSION
 }
 
 function mk_zlmediakit () {
@@ -92,11 +95,12 @@ cat <<EOF > $tmp_config
     cd build
     cmake ..  $openssl_cmake_part_arg $build_for_host_cmake_part_arg \
         $output_cmake_part_arg \
+        -DCMAKE_BUILD_TYPE=Release  \
         -DENABLE_HLS=off            \
         -DENABLE_HLS_FMP4=off       \
         -DENABLE_MYSQL=off          \
         -DENABLE_WEBRTC=off         \
-        -DDISABLE_REPORT=on          \
+        -DDISABLE_REPORT=on         \
         -DENABLE_MP4=on             \
         -DENABLE_SRT=off            \
         -DENABLE_SERVER_LIB=on      \
